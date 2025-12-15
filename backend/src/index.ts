@@ -17,19 +17,25 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
 
-// CORS configuration - allow Railway domains and localhost for development
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173', // Vite default port
-  process.env.FRONTEND_URL, // Railway frontend URL
-].filter(Boolean); // Remove undefined values
+// CORS configuration
+// - In production: allow the deployed frontend origin if provided, otherwise allow all origins.
+// - In development: allow all origins (simplifies local dev).
+const isProd = process.env.NODE_ENV === 'production';
+const allowedOrigins = (isProd
+  ? [process.env.FRONTEND_URL] // Railway frontend URL (recommended to set)
+  : [
+      'http://localhost:3000',
+      'http://localhost:5173', // Vite default port
+      process.env.FRONTEND_URL,
+    ]
+).filter(Boolean);
 
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? allowedOrigins.length > 0 ? allowedOrigins : true // Allow Railway domains or all in production
-    : true, // Allow all in development
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: isProd ? (allowedOrigins.length > 0 ? allowedOrigins : true) : true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
