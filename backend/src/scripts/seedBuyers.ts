@@ -1,0 +1,205 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+interface BuyerData {
+  name: string;
+  paymentEmail?: string;
+  phone?: string;
+  address?: string;
+  priceSheetUrl?: string;
+  bestFormOfContact?: string;
+  facebookLink?: string;
+  removeLabels?: boolean;
+  reachOutPriorToInvoicing?: boolean;
+  paymentMethods?: string;
+  isPreferred?: boolean;
+}
+
+const buyersData: BuyerData[] = [
+  {
+    name: 'Northeast Medical Exchange',
+    paymentEmail: 'Purchasing@northeastmedicalexchange.com',
+    phone: '603-303-8424 ext 1204',
+    address: '2 Commerce Drive, Unit 105, Bedford, NH, 03110',
+    priceSheetUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJpkhoS4fyLt5tT560ddH_ukGnLEe0oz4SfCghLkWzqSf9hOOHBbfs0hZGzQvrhWCc1R0moWMCuxud/pubhtml',
+    bestFormOfContact: 'Email (Phone Number to Introduce)',
+    facebookLink: 'Contract Email Only - LSouza@NortheastMedical.com',
+    removeLabels: false,
+    reachOutPriorToInvoicing: false,
+    paymentMethods: 'PayPal, Wire, ACH',
+    isPreferred: false,
+  },
+  {
+    name: 'Charles Harris',
+    paymentEmail: 'Diabeticteststripguys@gmail.com',
+    phone: '510-405-4569',
+    address: '23 Maine Avenue, #94, Richmond, CA, 94804',
+    priceSheetUrl: 'https://docs.google.com/spreadsheets/d/1Qs80kY-H8I4taOq1XXONEWTvK5x5u7iKYk1LzWiGfNE/edit?gid=0#gid=0',
+    bestFormOfContact: 'Text',
+    facebookLink: 'Text Phone Number for Price Sheet or Support',
+    removeLabels: true,
+    reachOutPriorToInvoicing: false,
+    paymentMethods: 'PayPal, Venmo, CashApp and Zelle',
+    isPreferred: true,
+  },
+  {
+    name: 'Chris Sampson',
+    paymentEmail: 'BCDeacon31@gmail.com',
+    phone: '267-982-4471',
+    address: '2560 Frankford Avenue STORE, Philadelphia, PA, 19125',
+    priceSheetUrl: 'https://docs.google.com/spreadsheets/d/1Y6J9TVs5n8CtmLr5CckOpjkJgQTCkRLS/edit#gid=732569512',
+    bestFormOfContact: 'Email',
+    facebookLink: 'https://www.facebook.com/chris.sampson.10',
+    removeLabels: true,
+    reachOutPriorToInvoicing: true,
+    paymentMethods: 'Bank ACH, Wire, Cash App, PayPal and PayPal Friends & Family',
+    isPreferred: false,
+  },
+  {
+    name: 'PATH MEDICAL SUPPLY',
+    paymentEmail: 'payments@pathmedicalsupply.com',
+    phone: '405-965-8799',
+    address: '299 W Camino Gardens Blvd, Suite 303, Boca Raton, FL, 33432',
+    priceSheetUrl: 'https://docs.google.com/spreadsheets/d/1BLRws5kaYvV78_YK10JqjP8SxPXXwdLQm3sqkEGYar4/edit?usp=sharing',
+    bestFormOfContact: 'Text',
+    facebookLink: 'https://www.facebook.com/people/Sheldon-Clarke/pfbid0icQkwcESAN1gDtbnG9vKx2z4wNA8YYMB7AnxPDvwLCMoQdod4bXK6JDsihJaaR81l/',
+    removeLabels: false,
+    reachOutPriorToInvoicing: true,
+    paymentMethods: 'PrePayment only with PayPal - On Arrival - ACH, Wire, Zelle, Check',
+    isPreferred: true,
+  },
+  {
+    name: 'Ralphel Walton',
+    paymentEmail: 'sales@prestigemedicalsupply.net',
+    phone: '615-669-1243',
+    address: '871 Seven Oaks Blvd',
+    priceSheetUrl: 'https://docs.google.com/spreadsheets/d/1uhuQ1ovm1-NIizrU2HP8AM8UcVW5qOFQbewWL8DwyEk/edit#gid=1760226217',
+    bestFormOfContact: 'Email or Text',
+    facebookLink: 'https://www.facebook.com/Ralphelwal',
+    removeLabels: true,
+    reachOutPriorToInvoicing: true,
+    paymentMethods: 'Wire, Venmo, ACH, PayPal PrePayment, Cash App',
+    isPreferred: false,
+  },
+];
+
+function parseName(name: string): { firstName: string; lastName: string } {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: '' };
+  }
+  if (parts.length === 2) {
+    return { firstName: parts[0], lastName: parts[1] };
+  }
+  // For names with more than 2 parts, take first as first name, rest as last name
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(' '),
+  };
+}
+
+function parseAddress(address: string): {
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+} {
+  if (!address) {
+    return {};
+  }
+
+  // Try to parse address format: "Street, City, State, ZIP"
+  const parts = address.split(',').map((p) => p.trim());
+  
+  if (parts.length >= 3) {
+    const zipState = parts[parts.length - 1].split(/\s+/);
+    const state = zipState[0];
+    const zipCode = zipState[1] || '';
+    const city = parts[parts.length - 2];
+    const streetAddress = parts.slice(0, parts.length - 2).join(', ');
+
+    return {
+      address: streetAddress,
+      city,
+      state,
+      zipCode,
+    };
+  }
+
+  return { address };
+}
+
+async function seedBuyers() {
+  console.log('🌱 Seeding buyers...');
+
+  for (const buyerData of buyersData) {
+    const { firstName, lastName } = parseName(buyerData.name);
+    const addressParts = buyerData.address ? parseAddress(buyerData.address) : {};
+
+    try {
+      // Check if buyer already exists by phone or email
+      const existingBuyer = await prisma.buyer.findFirst({
+        where: {
+          OR: [
+            ...(buyerData.phone ? [{ phone: buyerData.phone }] : []),
+            ...(buyerData.paymentEmail ? [{ paymentEmail: buyerData.paymentEmail }] : []),
+          ],
+        },
+      });
+
+      const buyer = existingBuyer
+        ? await prisma.buyer.update({
+            where: { id: existingBuyer.id },
+            data: {
+              firstName,
+              lastName,
+              email: buyerData.paymentEmail || undefined,
+              paymentEmail: buyerData.paymentEmail,
+              phone: buyerData.phone || '',
+              ...addressParts,
+              priceSheetUrl: buyerData.priceSheetUrl,
+              bestFormOfContact: buyerData.bestFormOfContact,
+              facebookLink: buyerData.facebookLink,
+              removeLabels: buyerData.removeLabels ?? false,
+              reachOutPriorToInvoicing: buyerData.reachOutPriorToInvoicing ?? false,
+              paymentMethods: buyerData.paymentMethods,
+              isPreferred: buyerData.isPreferred ?? false,
+            },
+          })
+        : await prisma.buyer.create({
+            data: {
+              firstName,
+              lastName,
+              email: buyerData.paymentEmail || undefined,
+              paymentEmail: buyerData.paymentEmail,
+              phone: buyerData.phone || '',
+              ...addressParts,
+              priceSheetUrl: buyerData.priceSheetUrl,
+              bestFormOfContact: buyerData.bestFormOfContact,
+              facebookLink: buyerData.facebookLink,
+              removeLabels: buyerData.removeLabels ?? false,
+              reachOutPriorToInvoicing: buyerData.reachOutPriorToInvoicing ?? false,
+              paymentMethods: buyerData.paymentMethods,
+              isPreferred: buyerData.isPreferred ?? false,
+            },
+          });
+
+      console.log(`✅ Seeded buyer: ${buyer.firstName} ${buyer.lastName}`);
+    } catch (error) {
+      console.error(`❌ Error seeding buyer ${buyerData.name}:`, error);
+    }
+  }
+
+  console.log('✅ Finished seeding buyers!');
+}
+
+seedBuyers()
+  .catch((error) => {
+    console.error('Error seeding buyers:', error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+
