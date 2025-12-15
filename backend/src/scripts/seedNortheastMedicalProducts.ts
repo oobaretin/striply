@@ -513,6 +513,14 @@ async function seedNortheastMedicalProducts() {
     });
     console.log('✅ Created buyer: Northeast Medical Exchange');
   } else {
+    // Ensure active/preferred in case it was modified
+    buyer = await prisma.buyer.update({
+      where: { id: buyer.id },
+      data: {
+        isActive: true,
+        isPreferred: true,
+      },
+    });
     console.log(`✅ Found buyer: ${buyer.firstName} ${buyer.lastName}`);
   }
 
@@ -539,10 +547,17 @@ async function seedNortheastMedicalProducts() {
       if (categoryData.description) {
         category = await prisma.category.update({
           where: { id: category.id },
-          data: { description: categoryData.description },
+          data: { description: categoryData.description, isActive: true },
         });
         console.log(`\n📁 Updated category: ${category.name}`);
       } else {
+        // Ensure active even if previously deactivated
+        if (!category.isActive) {
+          category = await prisma.category.update({
+            where: { id: category.id },
+            data: { isActive: true },
+          });
+        }
         console.log(`\n📁 Found category: ${category.name}`);
       }
     }
@@ -568,6 +583,13 @@ async function seedNortheastMedicalProducts() {
         });
         console.log(`  📂 Created subcategory: ${subCategory.name}`);
       } else {
+        // Ensure active even if previously deactivated
+        if (!subCategory.isActive) {
+          subCategory = await prisma.subCategory.update({
+            where: { id: subCategory.id },
+            data: { isActive: true },
+          });
+        }
         console.log(`  📂 Found subcategory: ${subCategory.name}`);
       }
 
@@ -588,6 +610,7 @@ async function seedNortheastMedicalProducts() {
               specialNotes: productData.specialNotes,
               subCategoryId: subCategory.id,
               brand: productData.name.split(' ')[0], // Extract brand from name
+              isActive: true,
             },
           });
           console.log(`    ✅ Created product: ${product.name}`);
@@ -598,6 +621,9 @@ async function seedNortheastMedicalProducts() {
             data: {
               ndcCode: productData.ndcCode,
               specialNotes: productData.specialNotes,
+              brand: productData.name.split(' ')[0],
+              subCategoryId: subCategory.id,
+              isActive: true,
             },
           });
           console.log(`    ✅ Updated product: ${product.name}`);
@@ -635,12 +661,20 @@ async function seedNortheastMedicalProducts() {
   console.log('\n✅ Finished seeding Northeast Medical Exchange products!');
 }
 
-seedNortheastMedicalProducts()
-  .catch((error) => {
-    console.error('❌ Error seeding products:', error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Export for use in other scripts/routes (CommonJS + ESM)
+module.exports = seedNortheastMedicalProducts;
+module.exports.default = seedNortheastMedicalProducts;
+export default seedNortheastMedicalProducts;
+
+// Run if called directly
+if (require.main === module) {
+  seedNortheastMedicalProducts()
+    .catch((error) => {
+      console.error('❌ Error seeding products:', error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
 

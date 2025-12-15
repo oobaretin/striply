@@ -22,11 +22,11 @@ adminRoutes.post('/seed', async (req: AuthRequest, res, next) => {
     
     // Import seed functions
     const { seedBuyers } = await import('../scripts/seedBuyers');
-    const seedCategoriesAndProducts = (await import('../scripts/seedCategoriesAndProducts')).default;
+    const seedNortheastMedicalProducts = (await import('../scripts/seedNortheastMedicalProducts')).default;
     
     const results: any = {
       buyers: { success: false, message: '' },
-      categories: { success: false, message: '' },
+      products: { success: false, message: '' },
     };
     
     try {
@@ -41,17 +41,27 @@ adminRoutes.post('/seed', async (req: AuthRequest, res, next) => {
     }
     
     try {
-      // Step 2: Seed categories and products
-      console.log('📦 Seeding categories and products...');
-      await seedCategoriesAndProducts();
-      results.categories = { success: true, message: 'Categories and products seeded successfully' };
-      console.log('✅ Categories and products seeded');
+      // Step 2: Seed product catalog + Northeast pricing (idempotent)
+      console.log('📦 Seeding products and Northeast Medical Exchange pricing...');
+      await seedNortheastMedicalProducts();
+      results.products = { success: true, message: 'Products seeded successfully' };
+      console.log('✅ Products seeded');
     } catch (error: any) {
-      console.error('❌ Error seeding categories:', error);
-      results.categories = { success: false, message: error.message || 'Failed to seed categories' };
+      console.error('❌ Error seeding products:', error);
+      results.products = { success: false, message: error.message || 'Failed to seed products' };
     }
     
-    const allSuccess = results.buyers.success && results.categories.success;
+    const [buyerCount, categoryCount, productCount] = await Promise.all([
+      prisma.buyer.count(),
+      prisma.category.count(),
+      prisma.product.count(),
+    ]);
+
+    const allSuccess =
+      results.buyers.success &&
+      results.products.success &&
+      categoryCount > 0 &&
+      productCount > 0;
     
     res.json({
       success: allSuccess,
@@ -59,6 +69,11 @@ adminRoutes.post('/seed', async (req: AuthRequest, res, next) => {
         ? 'Database seeded successfully!' 
         : 'Seeding completed with some errors. Check results for details.',
       results,
+      counts: {
+        buyers: buyerCount,
+        categories: categoryCount,
+        products: productCount,
+      },
     });
   } catch (error) {
     next(error);
