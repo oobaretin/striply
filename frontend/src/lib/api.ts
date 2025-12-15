@@ -1,6 +1,23 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Ensure API URL has protocol
+let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+if (apiUrl && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+  apiUrl = `https://${apiUrl}`;
+}
+
+const API_BASE_URL = apiUrl;
+
+// Log API URL for debugging (only in browser console, not in production logs)
+if (typeof window !== 'undefined') {
+  console.log('API Base URL:', API_BASE_URL);
+  console.log('VITE_API_URL env:', import.meta.env.VITE_API_URL);
+  
+  // Warn if using localhost in production
+  if (API_BASE_URL.includes('localhost') && window.location.hostname !== 'localhost') {
+    console.warn('⚠️ WARNING: Using localhost API URL in production! Set VITE_API_URL in Railway variables.');
+  }
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
