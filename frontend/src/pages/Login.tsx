@@ -18,9 +18,9 @@ export default function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     setError('');
     setLoading(true);
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
       console.log('Attempting login to:', apiUrl);
       console.log('Email:', formData.email);
       
@@ -40,7 +40,14 @@ export default function Login({ onLogin }: LoginProps) {
       let errorMessage = 'Login failed. Please try again.';
       
       if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-        errorMessage = 'Request timed out. Please check your connection and try again.';
+        errorMessage = 'Request timed out. The backend server may be slow or unresponsive. If deployed on Railway, check Railway logs for errors.';
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        const isRailway = apiUrl.includes('railway.app');
+        errorMessage = isRailway 
+          ? `Cannot connect to Railway backend at ${apiUrl}. Check Railway dashboard for service status and logs.`
+          : `Cannot connect to backend server at ${apiUrl}. If running locally, ensure the backend is running.`;
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Invalid email or password. If this is your first time, please create an account using the link below.';
       } else if (err.response?.data?.error?.message) {
         errorMessage = err.response.data.error.message;
       } else if (err.message) {
