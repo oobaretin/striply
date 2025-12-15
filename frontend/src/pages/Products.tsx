@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { categoriesApi, buyersApi } from '../lib/api';
 import { ChevronDown, ChevronRight, ExternalLink, Image as ImageIcon, AlertCircle, TrendingUp, DollarSign, Settings } from 'lucide-react';
 
@@ -14,10 +14,40 @@ export default function Products() {
     return saved ? parseFloat(saved) : 20; // Default 20% profit margin
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 639px)').matches;
+  });
+  const [showAllBuyerColumns, setShowAllBuyerColumns] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    return !window.matchMedia('(max-width: 639px)').matches;
+  });
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 639px)');
+    const onChange = (e: MediaQueryListEvent) => {
+      setIsSmallScreen(e.matches);
+      // When switching to mobile, default to compact columns; when leaving mobile, show all.
+      setShowAllBuyerColumns(!e.matches);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const prioritizedBuyers = useMemo(() => {
+    const list = [...buyers];
+    list.sort((a, b) => {
+      const pref = Number(Boolean(b.isPreferred)) - Number(Boolean(a.isPreferred));
+      if (pref !== 0) return pref;
+      return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+    });
+    return list;
+  }, [buyers]);
 
   const loadData = async () => {
     try {
@@ -346,11 +376,27 @@ export default function Products() {
 
                           {/* Products */}
                           {expandedSubCategories.has(subCategory.id) && subCategory.products && (() => {
-                            const allBuyers = getAllBuyersForComparison();
+                            // Prefer showing preferred buyers first on mobile
+                            const allBuyers = (prioritizedBuyers.length > 0 ? prioritizedBuyers : getAllBuyersForComparison());
+                            const visibleBuyers = showAllBuyerColumns || !isSmallScreen ? allBuyers : allBuyers.slice(0, 2);
                             
                             return (
                             <div className="bg-white border-t border-gray-200">
-                              <div className="px-8 py-4">
+                              <div className="px-4 sm:px-8 py-4">
+                                {isSmallScreen && allBuyers.length > 2 && (
+                                  <div className="mb-3 flex items-center justify-between">
+                                    <div className="text-xs text-gray-500">
+                                      Showing {showAllBuyerColumns ? allBuyers.length : 2} of {allBuyers.length} buyers
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowAllBuyerColumns((v) => !v)}
+                                      className="text-xs font-medium text-primary-700 hover:text-primary-900"
+                                    >
+                                      {showAllBuyerColumns ? 'Show fewer columns' : 'Show all buyers'}
+                                    </button>
+                                  </div>
+                                )}
                                 <div className="overflow-x-auto">
                                   <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
@@ -358,10 +404,10 @@ export default function Products() {
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
                                           Product Name
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                           NDC Code
                                         </th>
-                                        {allBuyers.map((buyer) => (
+                                        {visibleBuyers.map((buyer) => (
                                           <th key={buyer.id} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
                                             <div className="flex flex-col">
                                               <div className="flex items-center gap-1">
@@ -386,10 +432,10 @@ export default function Products() {
                                             </span>
                                           </div>
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                                           Notes
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                                           Image
                                         </th>
                                       </tr>
@@ -426,7 +472,7 @@ export default function Products() {
                                                 {product.ndcCode || '-'}
                                               </span>
                                             </td>
-                                            {allBuyers.map((buyer) => {
+                                            {visibleBuyers.map((buyer) => {
                                               const buyerPrice = getBuyerPrice(product, `${buyer.firstName} ${buyer.lastName}`);
                                               return (
                                                 <td key={buyer.id} className="px-4 py-3">
@@ -567,7 +613,7 @@ export default function Products() {
                                                 );
                                               })()}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 hidden sm:table-cell">
                                               {product.specialNotes ? (
                                                 <div className="flex items-center">
                                                   <AlertCircle className="h-4 w-4 text-amber-500 mr-1" />
@@ -579,7 +625,7 @@ export default function Products() {
                                                 <span className="text-xs text-gray-400">-</span>
                                               )}
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
                                               {product.imageUrl ? (
                                                 <a
                                                   href={product.imageUrl}
