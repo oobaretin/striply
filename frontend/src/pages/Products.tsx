@@ -15,34 +15,6 @@ export default function Products() {
   });
   const [showSettings, setShowSettings] = useState(false);
 
-  const getLoadedCounts = () => {
-    const subCategoriesCount = categories.reduce(
-      (sum, c) => sum + (c.subCategories?.length || 0),
-      0
-    );
-    const products = categories.flatMap((c) =>
-      (c.subCategories || []).flatMap((sc: any) => sc.products || [])
-    );
-    const buyerPriceRows = products.reduce(
-      (sum: number, p: any) => sum + (p.buyerPrices?.length || 0),
-      0
-    );
-    const buyersWithAnyPrices = new Set<string>();
-    for (const p of products) {
-      for (const bp of p.buyerPrices || []) {
-        buyersWithAnyPrices.add(`${bp.buyer?.firstName || ''} ${bp.buyer?.lastName || ''}`.trim());
-      }
-    }
-    return {
-      categories: categories.length,
-      subCategories: subCategoriesCount,
-      products: products.length,
-      buyers: buyers.length,
-      buyerPriceRows,
-      buyersWithAnyPrices: buyersWithAnyPrices.size,
-    };
-  };
-
   useEffect(() => {
     loadData();
   }, []);
@@ -254,36 +226,6 @@ export default function Products() {
             <span>Profit Settings</span>
           </button>
         </div>
-
-        {/* Data status banner (helps debug "empty" product lists) */}
-        {categories.length > 0 && (
-          <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
-            {(() => {
-              const counts = getLoadedCounts();
-              return (
-                <div className="text-sm text-gray-700 space-y-1">
-                  <div className="font-medium text-gray-900">Loaded data</div>
-                  <div>
-                    Categories: <span className="font-semibold">{counts.categories}</span>, Sub-categories:{' '}
-                    <span className="font-semibold">{counts.subCategories}</span>, Products:{' '}
-                    <span className="font-semibold">{counts.products}</span>
-                  </div>
-                  <div>
-                    Buyers: <span className="font-semibold">{counts.buyers}</span>, Price rows:{' '}
-                    <span className="font-semibold">{counts.buyerPriceRows}</span> (buyers with prices:{' '}
-                    <span className="font-semibold">{counts.buyersWithAnyPrices}</span>)
-                  </div>
-                  {counts.buyersWithAnyPrices <= 1 && (
-                    <div className="text-xs text-gray-500 pt-1">
-                      If most price columns look empty: that’s expected unless you’ve seeded buyer price sheets for
-                      multiple buyers. The current seed primarily populates Northeast Medical Exchange pricing.
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
-        )}
         
         {/* Profit Margin Settings Panel */}
         {showSettings && (
