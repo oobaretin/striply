@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
+    "seed": "tsx src/scripts/seedBuyers.ts && tsx src/scripts/seedCategoriesAndProducts.ts",
     "seed:buyers": "tsx src/scripts/seedBuyers.ts",
     "update:buyers": "tsx src/scripts/updateBuyersFromPriceSheets.ts",
     "import:products": "tsx src/scripts/importProductsFromPriceSheets.ts",
