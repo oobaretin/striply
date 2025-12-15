@@ -20,6 +20,7 @@ export default function Login({ onLogin }: LoginProps) {
     setLoading(true);
 
     try {
+      console.log('Attempting login to:', import.meta.env.VITE_API_URL || 'http://localhost:3001/api');
       const response = await authApi.login(formData.email, formData.password);
       if (response.success) {
         localStorage.setItem('token', response.data.token);
@@ -28,7 +29,9 @@ export default function Login({ onLogin }: LoginProps) {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+      const errorMessage = err.response?.data?.error?.message || err.message || 'Login failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
