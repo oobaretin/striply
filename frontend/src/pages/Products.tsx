@@ -49,6 +49,11 @@ export default function Products() {
     return list;
   }, [buyers]);
 
+  // Hide the "Test Strips" category section on the Products page (UI-only)
+  const displayCategories = useMemo(() => {
+    return categories.filter((c) => c?.name !== 'Test Strips');
+  }, [categories]);
+
   const loadData = async () => {
     try {
       setError(null);
@@ -63,8 +68,9 @@ export default function Products() {
       if (categoriesResponse.success) {
         setCategories(categoriesResponse.data || []);
         // Auto-expand first category
-        if (categoriesResponse.data && categoriesResponse.data.length > 0) {
-          setExpandedCategories(new Set([categoriesResponse.data[0].id]));
+        const firstNonTestStrips = (categoriesResponse.data || []).find((c: any) => c?.name !== 'Test Strips');
+        if (firstNonTestStrips) {
+          setExpandedCategories(new Set([firstNonTestStrips.id]));
         }
       } else {
         setError('Failed to load categories');
@@ -294,7 +300,7 @@ export default function Products() {
       </div>
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        {categories.length === 0 ? (
+        {displayCategories.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-gray-500 mb-4">No categories or products found.</p>
             <p className="text-sm text-gray-400 mb-2">
@@ -311,7 +317,7 @@ export default function Products() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {categories.map((category) => {
+            {displayCategories.map((category) => {
               // Get expiration range labels from first product's buyer price (Northeast Medical)
               const firstProduct = category.subCategories?.[0]?.products?.[0];
               const firstPrice = firstProduct?.buyerPrices?.find(
