@@ -20,17 +20,33 @@ export default function Login({ onLogin }: LoginProps) {
     setLoading(true);
 
     try {
-      console.log('Attempting login to:', import.meta.env.VITE_API_URL || 'http://localhost:3001/api');
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      console.log('Attempting login to:', apiUrl);
+      console.log('Email:', formData.email);
+      
       const response = await authApi.login(formData.email, formData.password);
+      console.log('Login response:', response);
+      
       if (response.success) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.owner));
         onLogin();
         navigate('/dashboard');
+      } else {
+        setError('Login failed. Please check your credentials.');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      const errorMessage = err.response?.data?.error?.message || err.message || 'Login failed. Please try again.';
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. Please check your connection and try again.';
+      } else if (err.response?.data?.error?.message) {
+        errorMessage = err.response.data.error.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
