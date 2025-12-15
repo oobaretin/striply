@@ -194,7 +194,10 @@ async function seedBuyers() {
   console.log('✅ Finished seeding buyers!');
 }
 
-// Export for use in other scripts
+// Export for use in other scripts (CommonJS)
+module.exports = { seedBuyers };
+
+// Also export as ES module for TypeScript
 export { seedBuyers };
 
 // Run if called directly

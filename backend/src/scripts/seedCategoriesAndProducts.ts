@@ -237,7 +237,11 @@ async function seedCategoriesAndProducts() {
   console.log('✅ Finished seeding categories and products!');
 }
 
-// Export as default for use in other scripts
+// Export as default for use in other scripts (CommonJS)
+module.exports = seedCategoriesAndProducts;
+module.exports.default = seedCategoriesAndProducts;
+
+// Also export as ES module for TypeScript
 export default seedCategoriesAndProducts;
 
 // Run if called directly
