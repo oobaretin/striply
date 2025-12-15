@@ -319,12 +319,19 @@ async function addCharlesHarrisPrices() {
   console.log(`\n✅ Finished! Added ${successCount} prices, created ${createdCount} products, ${notFoundCount} products not found.`);
 }
 
-addCharlesHarrisPrices()
-  .catch((error) => {
-    console.error('Error:', error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Export for use in other scripts/routes (CommonJS + ESM)
+module.exports = { addCharlesHarrisPrices };
+export { addCharlesHarrisPrices };
+
+// Run if called directly
+if (require.main === module) {
+  addCharlesHarrisPrices()
+    .catch((error) => {
+      console.error('Error:', error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
 

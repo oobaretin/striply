@@ -413,12 +413,19 @@ async function addPathMedicalPrices() {
   console.log(`\n✅ Finished! Added ${successCount} prices, ${notFoundCount} products not found.`);
 }
 
-addPathMedicalPrices()
-  .catch((error) => {
-    console.error('Error:', error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Export for use in other scripts/routes (CommonJS + ESM)
+module.exports = { addPathMedicalPrices };
+export { addPathMedicalPrices };
+
+// Run if called directly
+if (require.main === module) {
+  addPathMedicalPrices()
+    .catch((error) => {
+      console.error('Error:', error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
 

@@ -105,4 +105,66 @@ adminRoutes.get('/seed/status', async (req: AuthRequest, res, next) => {
   }
 });
 
+/**
+ * Seed additional buyer price sheets (no terminal required)
+ *
+ * Body:
+ *  - { keys?: string[] } where keys can include:
+ *      "charles-harris" | "chris-sampson" | "path-medical" | "ralph-walton"
+ *    If omitted, seeds all.
+ */
+adminRoutes.post('/seed/prices', async (req: AuthRequest, res, next) => {
+  try {
+    const keys: string[] = Array.isArray(req.body?.keys) ? req.body.keys : [];
+    const requested = keys.length > 0 ? new Set(keys) : null;
+
+    const results: Record<string, { success: boolean; message: string }> = {};
+
+    const runIfRequested = async (
+      key: string,
+      runner: () => Promise<void>
+    ) => {
+      if (requested && !requested.has(key)) return;
+      try {
+        await runner();
+        results[key] = { success: true, message: 'ok' };
+      } catch (e: any) {
+        results[key] = { success: false, message: e?.message || 'failed' };
+      }
+    };
+
+    // Import runners lazily (avoid loading large modules unless needed)
+    await runIfRequested('charles-harris', async () => {
+      const mod = await import('../scripts/addCharlesHarrisPrices');
+      await mod.addCharlesHarrisPrices();
+    });
+    await runIfRequested('chris-sampson', async () => {
+      const mod = await import('../scripts/addChrisSampsonPrices');
+      await mod.addChrisSampsonPrices();
+    });
+    await runIfRequested('path-medical', async () => {
+      const mod = await import('../scripts/addPathMedicalPrices');
+      await mod.addPathMedicalPrices();
+    });
+    await runIfRequested('ralph-walton', async () => {
+      const mod = await import('../scripts/addRalphWaltonPrices');
+      await mod.addRalphWaltonPrices();
+    });
+
+    // Report current pricing coverage
+    const buyerPriceCount = await prisma.buyerProductPrice.count();
+
+    const allOk = Object.values(results).every((r) => r.success);
+    res.json({
+      success: allOk,
+      results,
+      counts: {
+        buyerPrices: buyerPriceCount,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 
