@@ -194,12 +194,18 @@ async function seedBuyers() {
   console.log('✅ Finished seeding buyers!');
 }
 
-seedBuyers()
-  .catch((error) => {
-    console.error('Error seeding buyers:', error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Export for use in other scripts
+export { seedBuyers };
+
+// Run if called directly
+if (require.main === module) {
+  seedBuyers()
+    .catch((error) => {
+      console.error('Error seeding buyers:', error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
 

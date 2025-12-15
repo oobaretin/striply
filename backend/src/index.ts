@@ -15,7 +15,7 @@ import { adminRoutes } from './routes/admin';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
 // CORS configuration - allow Railway domains and localhost for development
 const allowedOrigins = [

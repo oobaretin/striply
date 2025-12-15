@@ -237,12 +237,18 @@ async function seedCategoriesAndProducts() {
   console.log('✅ Finished seeding categories and products!');
 }
 
-seedCategoriesAndProducts()
-  .catch((error) => {
-    console.error('Error seeding categories:', error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Export as default for use in other scripts
+export default seedCategoriesAndProducts;
+
+// Run if called directly
+if (require.main === module) {
+  seedCategoriesAndProducts()
+    .catch((error) => {
+      console.error('Error seeding categories:', error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
 
