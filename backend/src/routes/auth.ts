@@ -21,7 +21,13 @@ authRoutes.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ success: false, errors: errors.array() });
+        return res.status(400).json({ 
+          success: false, 
+          error: {
+            message: errors.array().map(e => e.msg || e.message).join(', ')
+          },
+          errors: errors.array() 
+        });
       }
 
       const { email, password, firstName, lastName, phone, address, city, state, zipCode, country } = req.body;
@@ -254,6 +260,9 @@ authRoutes.put(
     }
   }
 );
+
+
+
 
 
 

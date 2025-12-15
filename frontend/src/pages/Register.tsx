@@ -53,7 +53,34 @@ export default function Register({ onRegister }: RegisterProps) {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. The backend server may be slow or unresponsive. If deployed on Railway, check Railway logs for errors.';
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const isRailway = apiUrl.includes('railway.app');
+        errorMessage = isRailway 
+          ? `Cannot connect to Railway backend. Check Railway dashboard for service status and logs.`
+          : `Cannot connect to backend server. If running locally, ensure the backend is running.`;
+      } else if (err.response?.status === 409) {
+        errorMessage = 'An account with this email already exists. Please login instead.';
+      } else if (err.response?.status === 400) {
+        // Validation errors
+        const validationErrors = err.response?.data?.errors;
+        if (validationErrors && Array.isArray(validationErrors)) {
+          errorMessage = validationErrors.map((e: any) => e.msg || e.message).join(', ');
+        } else {
+          errorMessage = err.response?.data?.error?.message || 'Invalid input. Please check your information.';
+        }
+      } else if (err.response?.data?.error?.message) {
+        errorMessage = err.response.data.error.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
