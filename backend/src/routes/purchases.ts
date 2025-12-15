@@ -81,7 +81,7 @@ purchaseRoutes.post(
         return res.status(400).json({ success: false, errors: errors.array() });
       }
 
-      const { customerId, purchaseDate, items, notes } = req.body;
+      const { customerId, purchaseDate, items, notes, purchaseMethod } = req.body;
 
       // Verify customer exists
       const customer = await prisma.customer.findUnique({
