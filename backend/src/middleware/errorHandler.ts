@@ -1,8 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 
-export interface AppError extends Error {
+// AppError as a class so it can be constructed and used at runtime
+export class AppError extends Error {
   statusCode?: number;
   code?: string;
+
+  constructor(message: string, statusCode = 500, code?: string) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    Object.setPrototypeOf(this, AppError.prototype);
+  }
 }
 
 export const errorHandler = (
