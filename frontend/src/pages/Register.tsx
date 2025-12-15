@@ -92,6 +92,7 @@ export default function Register({ onRegister }: RegisterProps) {
                 id="firstName"
                 name="firstName"
                 type="text"
+                autoComplete="given-name"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 value={formData.firstName}
@@ -106,6 +107,7 @@ export default function Register({ onRegister }: RegisterProps) {
                 id="lastName"
                 name="lastName"
                 type="text"
+                autoComplete="family-name"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 value={formData.lastName}
@@ -120,6 +122,7 @@ export default function Register({ onRegister }: RegisterProps) {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 value={formData.email}
@@ -134,6 +137,7 @@ export default function Register({ onRegister }: RegisterProps) {
                 id="phone"
                 name="phone"
                 type="tel"
+                autoComplete="tel"
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -148,6 +152,7 @@ export default function Register({ onRegister }: RegisterProps) {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   className="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   value={formData.password}
@@ -175,6 +180,7 @@ export default function Register({ onRegister }: RegisterProps) {
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   className="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   value={formData.confirmPassword}
