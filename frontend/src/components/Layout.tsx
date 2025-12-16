@@ -90,7 +90,7 @@ export default function Layout({ onLogout }: LayoutProps) {
           <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl flex flex-col">
             <div className="h-16 px-4 border-b border-gray-200 flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
-                <img src="/logo.png" alt="Striply" className="h-12 w-auto" />
+                <img src="/logo.png" alt="Striply" className="h-14 w-auto" />
               </Link>
               <button
                 type="button"
@@ -143,7 +143,8 @@ export default function Layout({ onLogout }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-600 mb-4 md:mb-0">
-              <img src="/logo.png" alt="Striply" className="h-28 w-auto mb-2" />
+              {/* Match header logo size on mobile, larger on desktop */}
+              <img src="/logo.png" alt="Striply" className="h-14 sm:h-28 w-auto mb-2" />
               <p>© {new Date().getFullYear()} All rights reserved.</p>
             </div>
             <div className="text-sm text-gray-600">
