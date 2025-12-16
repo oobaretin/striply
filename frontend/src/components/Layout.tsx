@@ -30,7 +30,7 @@ export default function Layout({ onLogout }: LayoutProps) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 sm:h-24">
+          <div className="flex justify-between h-24 sm:h-24">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 {/* Mobile menu button */}
@@ -43,7 +43,8 @@ export default function Layout({ onLogout }: LayoutProps) {
                   <Menu className="h-6 w-6" />
                 </button>
                 <Link to="/dashboard" className="flex items-center">
-                  <img src="/logo.png" alt="Striply" className="h-14 sm:h-32 w-auto" />
+                  {/* Match footer logo size on mobile */}
+                  <img src="/logo.png" alt="Striply" className="h-28 sm:h-32 w-auto" />
                 </Link>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -88,9 +89,9 @@ export default function Layout({ onLogout }: LayoutProps) {
             aria-hidden="true"
           />
           <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl flex flex-col">
-            <div className="h-16 px-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="h-24 px-4 border-b border-gray-200 flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
-                <img src="/logo.png" alt="Striply" className="h-14 w-auto" />
+                <img src="/logo.png" alt="Striply" className="h-28 w-auto" />
               </Link>
               <button
                 type="button"
@@ -143,8 +144,7 @@ export default function Layout({ onLogout }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-600 mb-4 md:mb-0">
-              {/* Match header logo size on mobile, larger on desktop */}
-              <img src="/logo.png" alt="Striply" className="h-14 sm:h-28 w-auto mb-2" />
+              <img src="/logo.png" alt="Striply" className="h-28 w-auto mb-2" />
               <p>© {new Date().getFullYear()} All rights reserved.</p>
             </div>
             <div className="text-sm text-gray-600">
