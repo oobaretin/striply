@@ -134,7 +134,7 @@ export default function SellerLanding() {
     },
     {
       q: 'Who pays for the shipping?',
-      a: 'We cover all shipping costs. Fill out the form and we’ll send you a prepaid shipping label. Package your items and drop them off—easy.',
+      a: "We cover all shipping costs. Fill out the form and we’ll send you a prepaid shipping label.\n\nShipping steps:\n1) Check: Check the expiration dates — we cannot purchase expired test strips.\n2) Pack: Place your items in a box with padding or bubble wrap, tape the box, and paste the label.\n3) Ship: Give your package to your mail carrier or drop it off at your local UPS, FedEx, or USPS store.",
     },
     {
       q: 'Damage guidelines',
