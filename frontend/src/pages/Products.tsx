@@ -33,6 +33,24 @@ export default function Products() {
     if (typeof window === 'undefined') return true;
     return !window.matchMedia('(max-width: 639px)').matches;
   });
+  const [openInfoKey, setOpenInfoKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (!openInfoKey) return;
+
+    const onDocClick = () => setOpenInfoKey(null);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenInfoKey(null);
+    };
+
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [openInfoKey]);
 
   useEffect(() => {
     loadData();
@@ -157,6 +175,37 @@ export default function Products() {
     return `$${price.toFixed(2)}`;
   };
 
+  const InfoButton = ({ infoKey, title, body }: { infoKey: string; title: string; body: string }) => {
+    const isOpen = openInfoKey === infoKey;
+    return (
+      <span className="relative inline-flex items-center" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          aria-label={title}
+          className="ml-1 inline-flex items-center justify-center rounded hover:bg-gray-100 p-0.5"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenInfoKey((k) => (k === infoKey ? null : infoKey));
+          }}
+        >
+          <AlertCircle className="h-3 w-3 text-gray-400" />
+        </button>
+
+        {isOpen && (
+          <div
+            role="dialog"
+            aria-label={title}
+            className="absolute left-0 top-full mt-1 z-[200] w-64 rounded-lg border border-gray-200 bg-white shadow-lg p-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-xs font-semibold text-gray-900">{title}</div>
+            <div className="mt-1 text-[11px] leading-relaxed text-gray-600 whitespace-pre-wrap">{body}</div>
+          </div>
+        )}
+      </span>
+    );
+  };
+
   const renderBuyerPriceCell = (buyerPrice: any) => {
     if (!buyerPrice) return <span className="text-xs text-gray-400">-</span>;
 
@@ -180,16 +229,31 @@ export default function Products() {
           <div key={l.label} className="flex items-center gap-1">
             <span className="text-[10px] text-gray-400">{l.label}:</span>
             <span className={`text-sm font-semibold ${l.className}`}>{formatPrice(l.value)}</span>
+            <InfoButton
+              infoKey={`bp:${buyerPrice.id}:${l.label}`}
+              title={`${l.label} expiration range`}
+              body={
+                l.label === 'R1'
+                  ? buyerPrice.expirationRange1Label || 'Range 1'
+                  : l.label === 'R2'
+                    ? buyerPrice.expirationRange2Label || 'Range 2'
+                    : l.label === 'R3'
+                      ? buyerPrice.expirationRange3Label || 'Range 3'
+                      : buyerPrice.expirationRange4Label || 'Range 4'
+              }
+            />
           </div>
         ))}
 
         {buyerPrice.dingReductionPrice !== null && buyerPrice.dingReductionPrice !== undefined && (
-          <div className="relative inline-block group">
-            <div className="flex items-center gap-1 cursor-help">
-              <span className="text-xs text-gray-500">Ding:</span>
-              <span className="text-xs text-gray-700">{formatPrice(buyerPrice.dingReductionPrice)}</span>
-              <AlertCircle className="h-3 w-3 text-gray-400" />
-            </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-500">Ding:</span>
+            <span className="text-xs text-gray-700">{formatPrice(buyerPrice.dingReductionPrice)}</span>
+            <InfoButton
+              infoKey={`bp:${buyerPrice.id}:ding`}
+              title="Ding reduction"
+              body="This is the amount to subtract from the mint price for dinged/acceptable-damage boxes (per the buyer’s sheet)."
+            />
           </div>
         )}
 
@@ -197,6 +261,11 @@ export default function Products() {
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-gray-400">Dam:</span>
             <span className="text-xs font-semibold text-rose-600">{formatPrice(buyerPrice.damagedPrice)}</span>
+            <InfoButton
+              infoKey={`bp:${buyerPrice.id}:damaged`}
+              title="Damaged price"
+              body="Buyer’s price for damaged boxes (when provided on the sheet)."
+            />
           </div>
         )}
       </div>
@@ -640,33 +709,11 @@ export default function Products() {
                                                               {isBest && (
                                                                 <TrendingUp className="h-3 w-3 text-green-600" />
                                                               )}
-                                                              <div className="relative inline-block group">
-                                                                <AlertCircle className="h-3 w-3 text-gray-400 cursor-help group-hover:text-gray-200 transition-colors" />
-                                                                {/* Tooltip - positioned to the right to avoid overlap */}
-                                                                <div className="absolute left-full top-0 ml-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] pointer-events-none">
-                                                                  <div className="bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 w-72">
-                                                                    <div className="font-semibold mb-1">Recommended Purchase Price</div>
-                                                                    <div className="text-gray-300 text-[11px] leading-relaxed mb-2">
-                                                                      This is the maximum price you should pay sellers to achieve your target profit margin ({rec.profitMargin}%) when selling to buyers.
-                                                                    </div>
-                                                                    <div className="mt-2 pt-2 border-t border-gray-700">
-                                                                      <div className="text-gray-400 text-[10px] leading-relaxed mb-1">
-                                                                        <strong>Calculation:</strong>
-                                                                      </div>
-                                                                      <div className="text-gray-400 text-[10px] leading-relaxed">
-                                                                        Recommended = {formatPrice(rec.buyerPrice)} ÷ (1 + {rec.profitMargin}% / 100) = {formatPrice(rec.recommendedPurchasePrice)}
-                                                                      </div>
-                                                                    </div>
-                                                                    <div className="mt-2 pt-2 border-t border-gray-700">
-                                                                      <div className="text-gray-400 text-[10px] leading-relaxed">
-                                                                        <strong>Result:</strong> Buy at {formatPrice(rec.recommendedPurchasePrice)}, sell at {formatPrice(rec.buyerPrice)} to {rec.buyerName} for {rec.profitMargin}% profit ({formatPrice(rec.buyerPrice - rec.recommendedPurchasePrice)} per unit).
-                                                                      </div>
-                                                                    </div>
-                                                                    {/* Tooltip arrow pointing left */}
-                                                                    <div className="absolute right-full top-3 w-0 h-0 border-t-[6px] border-b-[6px] border-r-[6px] border-transparent border-r-gray-900"></div>
-                                                                  </div>
-                                                                </div>
-                                                              </div>
+                                                              <InfoButton
+                                                                infoKey={`rec:${product.id}:${idx}`}
+                                                                title="Recommended Purchase Price"
+                                                                body={`This is the maximum price you should pay sellers to achieve your target profit margin (${rec.profitMargin}%) when selling to buyers.\n\nCalculation:\nRecommended = ${formatPrice(rec.buyerPrice)} ÷ (1 + ${rec.profitMargin}% / 100) = ${formatPrice(rec.recommendedPurchasePrice)}\n\nResult:\nBuy at ${formatPrice(rec.recommendedPurchasePrice)}, sell at ${formatPrice(rec.buyerPrice)} to ${rec.buyerName} for ${rec.profitMargin}% profit (${formatPrice(rec.buyerPrice - rec.recommendedPurchasePrice)} per unit).`}
+                                                              />
                                                             </div>
                                                           </div>
                                                           <div className="text-sm font-bold text-green-700 mb-0.5">
