@@ -227,8 +227,15 @@ export default function SellerLanding() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-50">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
-            <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl p-4">
+            <div
+              className="absolute inset-0 bg-black/40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div
+              className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl p-4"
+              style={{ backgroundColor: '#fff' }}
+            >
               <div className="flex items-center justify-between">
                 <div className="font-semibold text-gray-900">Menu</div>
                 <button

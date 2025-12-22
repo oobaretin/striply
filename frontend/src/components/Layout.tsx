@@ -85,10 +85,14 @@ export default function Layout({ onLogout }: LayoutProps) {
         <div className="fixed inset-0 z-50 sm:hidden" role="dialog" aria-modal="true">
           <div
             className="absolute inset-0 bg-black/40"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl flex flex-col">
+          <div
+            className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl flex flex-col"
+            style={{ backgroundColor: '#fff' }}
+          >
             <div className="h-24 px-4 border-b border-gray-200 flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <img src="/logo.png" alt="Striply" className="h-28 w-auto" />
