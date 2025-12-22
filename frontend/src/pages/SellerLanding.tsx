@@ -30,7 +30,22 @@ export default function SellerLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    brand1: '',
+    boxes1: '',
+    expiration1: '',
+    brand2: '',
+    boxes2: '',
+    expiration2: '',
+    paymentMethod: '',
+    preferredContactMethod: '',
+    heardAboutUs: '',
+    comments: '',
+  });
 
   const navLinks = useMemo(
     () => [
@@ -92,7 +107,22 @@ export default function SellerLanding() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      location: '',
+      brand1: '',
+      boxes1: '',
+      expiration1: '',
+      brand2: '',
+      boxes2: '',
+      expiration2: '',
+      paymentMethod: '',
+      preferredContactMethod: '',
+      heardAboutUs: '',
+      comments: '',
+    });
   };
 
   return (
@@ -432,7 +462,7 @@ export default function SellerLanding() {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Full name</label>
+                      <label className="block text-sm font-medium text-gray-700">Full Name *</label>
                       <input
                         type="text"
                         required
@@ -442,7 +472,7 @@ export default function SellerLanding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
+                      <label className="block text-sm font-medium text-gray-700">Email *</label>
                       <input
                         type="email"
                         required
@@ -452,7 +482,7 @@ export default function SellerLanding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Phone</label>
+                      <label className="block text-sm font-medium text-gray-700">Phone Number *</label>
                       <input
                         type="tel"
                         required
@@ -462,12 +492,148 @@ export default function SellerLanding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Message (optional)</label>
+                      <label className="block text-sm font-medium text-gray-700">Location (City, State) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        placeholder="e.g. Miami, FL"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <div className="text-sm font-semibold text-gray-900">SUPPLY DETAILS</div>
+                      <div className="text-xs text-gray-500 mt-1">Tell us what you have so we can quote accurately.</div>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 p-4">
+                      <div className="text-sm font-semibold text-gray-900">Test Strips Brand? *</div>
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600">Brand *</label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.brand1}
+                            onChange={(e) => setFormData({ ...formData, brand1: e.target.value })}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600">How many boxes? *</label>
+                          <input
+                            type="number"
+                            min={0}
+                            required
+                            value={formData.boxes1}
+                            onChange={(e) => setFormData({ ...formData, boxes1: e.target.value })}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="block text-xs font-medium text-gray-600">Expiration Date? *</label>
+                          <input
+                            type="date"
+                            required
+                            value={formData.expiration1}
+                            onChange={(e) => setFormData({ ...formData, expiration1: e.target.value })}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 p-4">
+                      <div className="text-sm font-semibold text-gray-900">
+                        Another Test Strip Brand? <span className="text-gray-500 font-normal">(optional)</span>
+                      </div>
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600">Brand</label>
+                          <input
+                            type="text"
+                            value={formData.brand2}
+                            onChange={(e) => setFormData({ ...formData, brand2: e.target.value })}
+                            placeholder="If no, leave blank"
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600">How many boxes?</label>
+                          <input
+                            type="number"
+                            min={0}
+                            value={formData.boxes2}
+                            onChange={(e) => setFormData({ ...formData, boxes2: e.target.value })}
+                            placeholder="If no, leave blank"
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="block text-xs font-medium text-gray-600">Expiration Date? (if no, leave blank)</label>
+                          <input
+                            type="date"
+                            value={formData.expiration2}
+                            onChange={(e) => setFormData({ ...formData, expiration2: e.target.value })}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <div className="text-sm font-semibold text-gray-900">PAYMENT AND CONTACT INFORMATION</div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">How would you like to be Paid?</label>
+                      <input
+                        type="text"
+                        value={formData.paymentMethod}
+                        onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                        placeholder="e.g. Zelle, PayPal, CashApp, Venmo"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Preferred contact method *</label>
+                      <select
+                        required
+                        value={formData.preferredContactMethod}
+                        onChange={(e) => setFormData({ ...formData, preferredContactMethod: e.target.value })}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      >
+                        <option value="" disabled>
+                          Select…
+                        </option>
+                        <option value="Phone Call">Phone Call</option>
+                        <option value="Text Message">Text Message</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">How did you hear about us? *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.heardAboutUs}
+                        onChange={(e) => setFormData({ ...formData, heardAboutUs: e.target.value })}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Comments? Anything You Want to add? <span className="text-gray-500 font-normal">(optional)</span>
+                      </label>
                       <textarea
                         rows={4}
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        placeholder="Brand, quantity, and expiration dates are helpful."
+                        value={formData.comments}
+                        onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+                        placeholder="Any details that help with the quote."
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
                     </div>
