@@ -31,11 +31,11 @@ function extractBracketCode(name: string): { cleanName: string; ndcCode?: string
 }
 
 async function upsertCategory(name: string) {
-  return prisma.category.upsert({
-    where: { name },
-    update: { isActive: true },
-    create: { name, isActive: true },
-  });
+  const existing = await prisma.category.findFirst({ where: { name } });
+  if (existing) {
+    return prisma.category.update({ where: { id: existing.id }, data: { isActive: true } });
+  }
+  return prisma.category.create({ data: { name, isActive: true } });
 }
 
 async function upsertSubCategory(categoryId: string, name: string) {
