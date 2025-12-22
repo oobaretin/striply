@@ -279,12 +279,17 @@ export default function SellerLanding() {
               <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
                 Sell diabetic supplies
                 <span className="text-emerald-600"> quickly</span> and <span className="text-emerald-600">securely</span>.
-              </h1>
+            </h1>
               <p className="mt-4 text-lg text-gray-600 max-w-xl">
                 Get a quote, ship or drop off, then get paid after verification. Simple and straightforward.
               </p>
+              <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">
+                GET PREPAID SHIPPING LABEL
+                <br />
+                FILL OUT THE FORM &amp; GET PAID ONCE ITEMS ARE RECEIVED
+            </div>
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <button
+              <button
                   type="button"
                   onClick={() => {
                     setSubmitted(false);
@@ -293,8 +298,8 @@ export default function SellerLanding() {
                   className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 font-semibold"
                 >
                   Get a quote <ArrowRight className="ml-2 h-5 w-5" />
-                </button>
-                <a
+              </button>
+              <a
                   href={`tel:${SELL_PHONE_TEL}`}
                   className="inline-flex items-center justify-center px-5 py-3 rounded-lg bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 font-semibold"
                 >
@@ -361,7 +366,7 @@ export default function SellerLanding() {
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold text-gray-900">How it works</h2>
             <p className="mt-2 text-gray-600">Three steps from quote to payment.</p>
-          </div>
+                  </div>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             {steps.map((s) => (
               <div key={s.number} className="rounded-2xl bg-white border border-gray-200 p-6 shadow-sm">
@@ -405,13 +410,13 @@ export default function SellerLanding() {
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold text-gray-900">FAQ</h2>
             <p className="mt-2 text-gray-600">Common questions we get from sellers.</p>
-          </div>
+            </div>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {faqs.map((f) => (
               <div key={f.q} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="font-semibold text-gray-900">{f.q}</div>
                 <div className="mt-2 text-sm text-gray-600">{f.a}</div>
-              </div>
+            </div>
             ))}
           </div>
         </div>
@@ -424,7 +429,7 @@ export default function SellerLanding() {
             <div>
               <h2 className="text-3xl font-bold">Ready to get a quote?</h2>
               <p className="mt-2 text-emerald-50">Call or email us, or use the quick form.</p>
-            </div>
+      </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
@@ -439,13 +444,13 @@ export default function SellerLanding() {
               <a
                 href={`mailto:${SELL_EMAIL}`}
                 className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-white/60 text-white font-semibold hover:bg-white/10"
-              >
-                <Mail className="mr-2 h-5 w-5" />
+            >
+              <Mail className="mr-2 h-5 w-5" />
                 {SELL_EMAIL}
-              </a>
-            </div>
+            </a>
           </div>
         </div>
+      </div>
       </section>
 
       {/* Modal */}
@@ -469,7 +474,7 @@ export default function SellerLanding() {
                   type="button"
                   className="p-2 rounded-md hover:bg-gray-100"
                   aria-label="Close"
-                  onClick={() => setShowForm(false)}
+              onClick={() => setShowForm(false)}
                 >
                   <X className="h-5 w-5 text-gray-700" />
                 </button>
@@ -484,14 +489,14 @@ export default function SellerLanding() {
                       <a className="underline" href={`mailto:${SELL_EMAIL}`}>{SELL_EMAIL}</a>.
                     </div>
                     <div className="mt-4">
-                      <button
-                        type="button"
+                  <button
+                    type="button"
                         className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
-                        onClick={() => setShowForm(false)}
-                      >
+                    onClick={() => setShowForm(false)}
+                  >
                         Close
-                      </button>
-                    </div>
+                  </button>
+                </div>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -500,33 +505,33 @@ export default function SellerLanding() {
                         <option key={opt} value={opt} />
                       ))}
                     </datalist>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Full Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Email *</label>
-                      <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Phone Number *</label>
-                      <input
-                        type="tel"
-                        required
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
                     </div>
@@ -605,9 +610,9 @@ export default function SellerLanding() {
                             onChange={(e) => setFormData({ ...formData, brand2: e.target.value })}
                             placeholder="If no, leave blank"
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          />
-                        </div>
-                        <div>
+                    />
+                  </div>
+                  <div>
                           <label className="block text-xs font-medium text-gray-600">How many boxes?</label>
                           <input
                             type="number"
@@ -625,9 +630,9 @@ export default function SellerLanding() {
                             value={formData.expiration2}
                             onChange={(e) => setFormData({ ...formData, expiration2: e.target.value })}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          />
-                        </div>
-                      </div>
+                    />
+                  </div>
+                </div>
                     </div>
 
                     <div className="pt-2">
@@ -685,21 +690,21 @@ export default function SellerLanding() {
                       />
                     </div>
                     <div className="pt-2 flex gap-3">
-                      <button
-                        type="submit"
+                  <button
+                    type="submit"
                         className="flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
-                      >
-                        Submit
-                      </button>
-                      <button
-                        type="button"
+                  >
+                    Submit
+                  </button>
+                  <button
+                    type="button"
                         className="flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 text-gray-800 font-semibold hover:bg-gray-50"
-                        onClick={() => setShowForm(false)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+                    onClick={() => setShowForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
                 )}
               </div>
             </div>
@@ -720,14 +725,14 @@ export default function SellerLanding() {
               <ul className="space-y-2 text-gray-400 text-sm">
                 {navLinks.map((l) => (
                   <li key={l.id}>
-                    <button
+                  <button
                       type="button"
                       onClick={() => scrollToId(l.id)}
                       className="hover:text-white transition-colors"
-                    >
+                  >
                       {l.label}
-                    </button>
-                  </li>
+                  </button>
+                </li>
                 ))}
                 <li>
                   <Link to="/login" className="hover:text-white transition-colors">
