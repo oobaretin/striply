@@ -14,6 +14,17 @@ export default function Products() {
     return saved ? parseFloat(saved) : 20; // Default 20% profit margin
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedBuyerIds, setSelectedBuyerIds] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem('striply_selected_buyer_ids');
+      if (!raw) return new Set();
+      const ids = JSON.parse(raw);
+      if (!Array.isArray(ids)) return new Set();
+      return new Set(ids.filter((v) => typeof v === 'string'));
+    } catch {
+      return new Set();
+    }
+  });
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(max-width: 639px)').matches;
@@ -26,6 +37,19 @@ export default function Products() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    // If there is no saved selection, default to preferred buyers (if any exist).
+    // Empty selection means "show all" (so we only set a default when we have preferreds).
+    const hasSaved = Boolean(localStorage.getItem('striply_selected_buyer_ids'));
+    if (hasSaved) return;
+
+    const preferred = buyers.filter((b) => Boolean(b?.isPreferred) && typeof b?.id === 'string').map((b) => b.id);
+    if (preferred.length > 0) {
+      setSelectedBuyerIds(new Set(preferred));
+      localStorage.setItem('striply_selected_buyer_ids', JSON.stringify(preferred));
+    }
+  }, [buyers]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -131,6 +155,52 @@ export default function Products() {
   const formatPrice = (price: number | null | undefined) => {
     if (price === null || price === undefined) return '-';
     return `$${price.toFixed(2)}`;
+  };
+
+  const renderBuyerPriceCell = (buyerPrice: any) => {
+    if (!buyerPrice) return <span className="text-xs text-gray-400">-</span>;
+
+    const lines: Array<{ label: string; value: number; className: string }> = [];
+    if (buyerPrice.expirationRange1Price !== null && buyerPrice.expirationRange1Price !== undefined) {
+      lines.push({ label: 'R1', value: buyerPrice.expirationRange1Price, className: 'text-green-600' });
+    }
+    if (buyerPrice.expirationRange2Price !== null && buyerPrice.expirationRange2Price !== undefined) {
+      lines.push({ label: 'R2', value: buyerPrice.expirationRange2Price, className: 'text-blue-600' });
+    }
+    if (buyerPrice.expirationRange3Price !== null && buyerPrice.expirationRange3Price !== undefined) {
+      lines.push({ label: 'R3', value: buyerPrice.expirationRange3Price, className: 'text-indigo-600' });
+    }
+    if (buyerPrice.expirationRange4Price !== null && buyerPrice.expirationRange4Price !== undefined) {
+      lines.push({ label: 'R4', value: buyerPrice.expirationRange4Price, className: 'text-purple-600' });
+    }
+
+    return (
+      <div className="flex flex-col space-y-1">
+        {lines.map((l) => (
+          <div key={l.label} className="flex items-center gap-1">
+            <span className="text-[10px] text-gray-400">{l.label}:</span>
+            <span className={`text-sm font-semibold ${l.className}`}>{formatPrice(l.value)}</span>
+          </div>
+        ))}
+
+        {buyerPrice.dingReductionPrice !== null && buyerPrice.dingReductionPrice !== undefined && (
+          <div className="relative inline-block group">
+            <div className="flex items-center gap-1 cursor-help">
+              <span className="text-xs text-gray-500">Ding:</span>
+              <span className="text-xs text-gray-700">{formatPrice(buyerPrice.dingReductionPrice)}</span>
+              <AlertCircle className="h-3 w-3 text-gray-400" />
+            </div>
+          </div>
+        )}
+
+        {buyerPrice.damagedPrice !== null && buyerPrice.damagedPrice !== undefined && (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-gray-400">Dam:</span>
+            <span className="text-xs font-semibold text-rose-600">{formatPrice(buyerPrice.damagedPrice)}</span>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // Profit optimization utilities
@@ -259,11 +329,11 @@ export default function Products() {
             className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
             <Settings className="h-4 w-4" />
-            <span>Profit Settings</span>
+            <span>Settings</span>
           </button>
         </div>
         
-        {/* Profit Margin Settings Panel */}
+        {/* Settings Panel */}
         {showSettings && (
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
@@ -287,6 +357,69 @@ export default function Products() {
                 <p className="text-xs text-gray-600 mt-2">
                   This determines the recommended purchase price from sellers. Higher margin = lower purchase price recommendations.
                 </p>
+
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-gray-700">Buyer columns</div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const preferred = prioritizedBuyers.filter((b) => b?.isPreferred).map((b) => b.id);
+                          const next = new Set(preferred);
+                          setSelectedBuyerIds(next);
+                          localStorage.setItem('striply_selected_buyer_ids', JSON.stringify([...next]));
+                        }}
+                        className="text-xs font-medium text-primary-700 hover:text-primary-900"
+                      >
+                        Preferred
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBuyerIds(new Set());
+                          localStorage.removeItem('striply_selected_buyer_ids');
+                        }}
+                        className="text-xs font-medium text-primary-700 hover:text-primary-900"
+                      >
+                        All
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Choose which buyer columns to show. Default is preferred buyers.
+                  </p>
+
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {(prioritizedBuyers.length > 0 ? prioritizedBuyers : getAllBuyersForComparison()).map((b) => {
+                      const name = `${b.firstName} ${b.lastName}`.trim();
+                      const checked = selectedBuyerIds.size === 0 ? true : selectedBuyerIds.has(b.id);
+                      return (
+                        <label key={b.id} className="flex items-center gap-2 text-sm text-gray-800">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => {
+                              const next = new Set(selectedBuyerIds);
+                              if (selectedBuyerIds.size === 0) {
+                                // If we were showing "all", start from all checked and then apply this change.
+                                (prioritizedBuyers.length > 0 ? prioritizedBuyers : getAllBuyersForComparison()).forEach((x) => next.add(x.id));
+                              }
+                              if (e.target.checked) next.add(b.id);
+                              else next.delete(b.id);
+
+                              setSelectedBuyerIds(next);
+                              localStorage.setItem('striply_selected_buyer_ids', JSON.stringify([...next]));
+                            }}
+                          />
+                          <span className="truncate">
+                            {name} {b.isPreferred ? <span className="text-[10px] text-yellow-700">(preferred)</span> : null}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setShowSettings(false)}
@@ -325,6 +458,8 @@ export default function Products() {
               );
               const range1Label = firstPrice?.expirationRange1Label || category.expirationRange1Label || '';
               const range2Label = firstPrice?.expirationRange2Label || category.expirationRange2Label || '';
+              const range3Label = firstPrice?.expirationRange3Label || '';
+              const range4Label = firstPrice?.expirationRange4Label || '';
 
               return (
                 <div key={category.id} className="border-b border-gray-200">
@@ -344,10 +479,12 @@ export default function Products() {
                         {category.description && (
                           <p className="text-xs text-gray-600 mt-1 max-w-2xl">{category.description}</p>
                         )}
-                        {(range1Label || range2Label) && (
+                        {(range1Label || range2Label || range3Label || range4Label) && (
                           <div className="flex gap-4 mt-1 text-xs text-gray-600">
                             {range1Label && <span>Range 1: {range1Label}</span>}
                             {range2Label && <span>Range 2: {range2Label}</span>}
+                            {range3Label && <span>Range 3: {range3Label}</span>}
+                            {range4Label && <span>Range 4: {range4Label}</span>}
                           </div>
                         )}
                       </div>
@@ -384,15 +521,16 @@ export default function Products() {
                           {expandedSubCategories.has(subCategory.id) && subCategory.products && (() => {
                             // Prefer showing preferred buyers first on mobile
                             const allBuyers = (prioritizedBuyers.length > 0 ? prioritizedBuyers : getAllBuyersForComparison());
-                            const visibleBuyers = showAllBuyerColumns || !isSmallScreen ? allBuyers : allBuyers.slice(0, 2);
+                            const filteredBuyers = selectedBuyerIds.size > 0 ? allBuyers.filter((b) => selectedBuyerIds.has(b.id)) : allBuyers;
+                            const visibleBuyers = showAllBuyerColumns || !isSmallScreen ? filteredBuyers : filteredBuyers.slice(0, 2);
                             
                             return (
                             <div className="bg-white border-t border-gray-200">
                               <div className="px-4 sm:px-8 py-4">
-                                {isSmallScreen && allBuyers.length > 2 && (
+                                {isSmallScreen && filteredBuyers.length > 2 && (
                                   <div className="mb-3 flex items-center justify-between">
                                     <div className="text-xs text-gray-500">
-                                      Showing {showAllBuyerColumns ? allBuyers.length : 2} of {allBuyers.length} buyers
+                                      Showing {showAllBuyerColumns ? filteredBuyers.length : 2} of {filteredBuyers.length} buyers
                                     </div>
                                     <button
                                       type="button"
@@ -424,6 +562,8 @@ export default function Products() {
                                               </div>
                                               {range1Label && <span className="text-[10px] font-normal text-gray-400 mt-0.5">{range1Label}</span>}
                                               {range2Label && <span className="text-[10px] font-normal text-gray-400">{range2Label}</span>}
+                                              {range3Label && <span className="text-[10px] font-normal text-gray-400">{range3Label}</span>}
+                                              {range4Label && <span className="text-[10px] font-normal text-gray-400">{range4Label}</span>}
                                             </div>
                                           </th>
                                         ))}
@@ -482,62 +622,7 @@ export default function Products() {
                                               const buyerPrice = getBuyerPrice(product, `${buyer.firstName} ${buyer.lastName}`);
                                               return (
                                                 <td key={buyer.id} className="px-4 py-3">
-                                                  {buyerPrice ? (
-                                                    <div className="flex flex-col space-y-1">
-                                                      {buyerPrice.expirationRange1Price !== null && buyerPrice.expirationRange1Price !== undefined && (
-                                                        <div>
-                                                          <span className="text-sm font-semibold text-green-600">
-                                                            {formatPrice(buyerPrice.expirationRange1Price)}
-                                                          </span>
-                                                        </div>
-                                                      )}
-                                                      {buyerPrice.expirationRange2Price !== null && buyerPrice.expirationRange2Price !== undefined && (
-                                                        <div>
-                                                          <span className="text-sm font-semibold text-blue-600">
-                                                            {formatPrice(buyerPrice.expirationRange2Price)}
-                                                          </span>
-                                                        </div>
-                                                      )}
-                                                      {buyerPrice.dingReductionPrice !== null && buyerPrice.dingReductionPrice !== undefined && (
-                                                        <div className="relative inline-block group">
-                                                          <div className="flex items-center gap-1 cursor-help">
-                                                            <span className="text-xs text-gray-500">Ding: </span>
-                                                            <span className="text-xs text-gray-700">
-                                                              {formatPrice(buyerPrice.dingReductionPrice)}
-                                                            </span>
-                                                            <span className="text-xs text-gray-400">ℹ️</span>
-                                                          </div>
-                                                          {/* Tooltip */}
-                                                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] pointer-events-none">
-                                                            <div className="bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 w-64">
-                                                              <div className="font-semibold mb-1">Ding Reduction Price</div>
-                                                              <div className="text-gray-300 text-[11px] leading-relaxed">
-                                                                This is the discount amount applied when selling products with minor cosmetic damage (scratches, dents, scuffs) instead of perfect "mint" condition.
-                                                              </div>
-                                                              <div className="mt-2 pt-2 border-t border-gray-700">
-                                                                <div className="text-gray-400 text-[10px] leading-relaxed">
-                                                                  <strong>Example:</strong> If mint price is $62.00 and ding reduction is $4.00, the dinged price would be $58.00.
-                                                                </div>
-                                                              </div>
-                                                              {/* Tooltip arrow */}
-                                                              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-gray-900"></div>
-                                                            </div>
-                                                          </div>
-                                                        </div>
-                                                      )}
-                                                      {/* Fallback to single price if no expiration ranges */}
-                                                      {!buyerPrice.expirationRange1Price && !buyerPrice.expirationRange2Price && buyerPrice.price && (
-                                                        <span className="text-sm font-semibold text-gray-900">
-                                                          {formatPrice(buyerPrice.price)}
-                                                        </span>
-                                                      )}
-                                                      {!buyerPrice.expirationRange1Price && !buyerPrice.expirationRange2Price && !buyerPrice.price && (
-                                                        <span className="text-xs text-gray-400">-</span>
-                                                      )}
-                                                    </div>
-                                                  ) : (
-                                                    <span className="text-xs text-gray-400">-</span>
-                                                  )}
+                                                  {renderBuyerPriceCell(buyerPrice)}
                                                 </td>
                                               );
                                             })}
@@ -572,7 +657,7 @@ export default function Products() {
                                                                 <TrendingUp className="h-3 w-3 text-green-600" />
                                                               )}
                                                               <div className="relative inline-block group">
-                                                                <span className="text-xs text-gray-400 cursor-help hover:text-gray-600 transition-colors">ℹ️</span>
+                                                                <AlertCircle className="h-3 w-3 text-gray-400 cursor-help group-hover:text-gray-200 transition-colors" />
                                                                 {/* Tooltip - positioned to the right to avoid overlap */}
                                                                 <div className="absolute left-full top-0 ml-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] pointer-events-none">
                                                                   <div className="bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 w-72">

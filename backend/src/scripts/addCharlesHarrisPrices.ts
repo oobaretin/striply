@@ -291,6 +291,7 @@ async function addCharlesHarrisPrices() {
               expirationRange2Label: range2Label,
               expirationRange2Price: range2Price || undefined,
               dingReductionPrice: dingReduction || undefined,
+              damagedPrice: priceData.damagedPrice || undefined,
             },
             create: {
               buyerId: buyer.id,
@@ -300,6 +301,7 @@ async function addCharlesHarrisPrices() {
               expirationRange2Label: range2Label,
               expirationRange2Price: range2Price || undefined,
               dingReductionPrice: dingReduction || undefined,
+              damagedPrice: priceData.damagedPrice || undefined,
             },
           });
 

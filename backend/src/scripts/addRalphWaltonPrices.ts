@@ -415,6 +415,7 @@ async function addRalphWaltonPrices() {
       const dingReduction = priceData.mint9Mos && priceData.dinged9Mos
         ? priceData.mint9Mos - priceData.dinged9Mos
         : null;
+      const damagedPrice = priceData.damaged9Mos ?? priceData.damaged7to8Mos ?? priceData.damaged6Mos ?? null;
 
       // Create or update buyer price
       await prisma.buyerProductPrice.upsert({
@@ -430,6 +431,7 @@ async function addRalphWaltonPrices() {
           expirationRange2Label: range2Label,
           expirationRange2Price: range2Price || undefined,
           dingReductionPrice: dingReduction || undefined,
+          damagedPrice: damagedPrice || undefined,
         },
         create: {
           buyerId: buyer.id,
@@ -439,6 +441,7 @@ async function addRalphWaltonPrices() {
           expirationRange2Label: range2Label,
           expirationRange2Price: range2Price || undefined,
           dingReductionPrice: dingReduction || undefined,
+          damagedPrice: damagedPrice || undefined,
         },
       });
 

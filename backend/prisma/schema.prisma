@@ -144,7 +144,12 @@ model BuyerProductPrice {
   expirationRange1Price Float? // Price for range 1
   expirationRange2Label String? // e.g., "Mint 9/26-11/26+"
   expirationRange2Price Float? // Price for range 2
+  expirationRange3Label String? // Optional: third expiration range label
+  expirationRange3Price Float? // Optional: third expiration range price
+  expirationRange4Label String? // Optional: fourth expiration range label
+  expirationRange4Price Float? // Optional: fourth expiration range price
   dingReductionPrice    Float? // Ding reduction price (discount amount)
+  damagedPrice          Float? // Optional: acceptable damage price
   // Legacy single price field (for backward compatibility)
   price                 Float? // Single price (if not using expiration ranges)
   createdAt             DateTime @default(now())
