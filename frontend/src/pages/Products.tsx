@@ -93,7 +93,9 @@ export default function Products() {
 
   // Hide the "Test Strips" category section on the Products page (UI-only)
   const displayCategories = useMemo(() => {
-    return categories.filter((c) => c?.name !== 'Test Strips');
+    const hiddenNames = new Set(['test strips', 'lancing devices and lancets']);
+    const norm = (v: any) => String(v ?? '').trim().toLowerCase();
+    return categories.filter((c) => !hiddenNames.has(norm(c?.name)));
   }, [categories]);
 
   const loadData = async () => {
@@ -564,7 +566,7 @@ export default function Products() {
                   {expandedCategories.has(category.id) && category.subCategories && (
                     <div className="bg-gray-50">
                       {category.subCategories
-                        .filter((sc: any) => sc?.name !== 'Lancing devices and lancets')
+                        .filter((sc: any) => String(sc?.name ?? '').trim().toLowerCase() !== 'lancing devices and lancets')
                         .map((subCategory: any) => (
                         <div key={subCategory.id} className="border-t border-gray-200">
                           {/* Sub-Category Header */}
