@@ -7,6 +7,8 @@ export type CleanupEmptyCatalogResult = {
   deactivatedCategories: number;
   mergedDuplicateSubCategories: number;
   movedProducts: number;
+  mergedDuplicateCategories: number;
+  movedSubCategories: number;
 };
 
 /**
@@ -20,6 +22,56 @@ async function cleanupEmptyCatalog(): Promise<CleanupEmptyCatalogResult> {
   let deactivatedCategories = 0;
   let mergedDuplicateSubCategories = 0;
   let movedProducts = 0;
+  let mergedDuplicateCategories = 0;
+  let movedSubCategories = 0;
+
+  const norm = (v: any) => String(v ?? '').trim().toLowerCase();
+
+  // 0) Merge duplicate categories by (case-insensitive) name.
+  // Keep the one with the most ACTIVE products; move subcategories from duplicates; deactivate duplicates.
+  const activeCategoriesForMerge = await prisma.category.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true },
+  });
+
+  const catGroups = new Map<string, Array<{ id: string; name: string }>>();
+  for (const c of activeCategoriesForMerge) {
+    const key = norm(c.name);
+    const list = catGroups.get(key) || [];
+    list.push(c);
+    catGroups.set(key, list);
+  }
+
+  for (const [, list] of catGroups) {
+    if (list.length <= 1) continue;
+
+    const counts = await Promise.all(
+      list.map(async (c) => {
+        const activeProductCount = await prisma.product.count({
+          where: {
+            isActive: true,
+            subCategory: { isActive: true, categoryId: c.id },
+          },
+        });
+        return { c, activeProductCount };
+      })
+    );
+
+    counts.sort((a, b) => b.activeProductCount - a.activeProductCount);
+    const keep = counts[0].c;
+    const toDeactivate = counts.slice(1).map((x) => x.c);
+
+    for (const dup of toDeactivate) {
+      const moved = await prisma.subCategory.updateMany({
+        where: { categoryId: dup.id },
+        data: { categoryId: keep.id },
+      });
+      movedSubCategories += moved.count;
+
+      await prisma.category.update({ where: { id: dup.id }, data: { isActive: false } });
+      mergedDuplicateCategories += 1;
+    }
+  }
 
   const activeSubCategories = await prisma.subCategory.findMany({
     where: { isActive: true },
@@ -30,7 +82,7 @@ async function cleanupEmptyCatalog(): Promise<CleanupEmptyCatalogResult> {
   // Keep the one with the most ACTIVE products; move products from duplicates; deactivate duplicates.
   const groups = new Map<string, Array<{ id: string; categoryId: string; name: string }>>();
   for (const sc of activeSubCategories) {
-    const key = `${sc.categoryId}::${sc.name.trim().toLowerCase()}`;
+    const key = `${sc.categoryId}::${norm(sc.name)}`;
     const list = groups.get(key) || [];
     list.push(sc);
     groups.set(key, list);
@@ -97,7 +149,14 @@ async function cleanupEmptyCatalog(): Promise<CleanupEmptyCatalogResult> {
     }
   }
 
-  return { deactivatedSubCategories, deactivatedCategories, mergedDuplicateSubCategories, movedProducts };
+  return {
+    deactivatedSubCategories,
+    deactivatedCategories,
+    mergedDuplicateSubCategories,
+    movedProducts,
+    mergedDuplicateCategories,
+    movedSubCategories,
+  };
 }
 
 // Export for API usage (CommonJS + ESM)
