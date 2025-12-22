@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { categoriesApi, buyersApi } from '../lib/api';
-import { ChevronDown, ChevronRight, ExternalLink, Image as ImageIcon, AlertCircle, TrendingUp, DollarSign, Settings } from 'lucide-react';
+import { ChevronDown, ChevronRight, AlertCircle, TrendingUp, DollarSign, Settings } from 'lucide-react';
 
 export default function Products() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -581,9 +581,7 @@ export default function Products() {
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                                           Notes
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                                          Image
-                                        </th>
+                                        
                                       </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
@@ -592,23 +590,9 @@ export default function Products() {
                                         return (
                                           <tr key={product.id} className="hover:bg-gray-50">
                                             <td className="px-4 py-3">
-                                              {product.imageUrl ? (
-                                                <a
-                                                  href={product.imageUrl}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="group flex items-center text-sm font-medium text-gray-900 hover:text-primary-600 transition-colors cursor-pointer"
-                                                  title="Click to view product image"
-                                                >
-                                                  <ImageIcon className="h-3.5 w-3.5 mr-1.5 text-primary-500" />
-                                                  <span>{product.name}</span>
-                                                  <ExternalLink className="h-3 w-3 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-primary-500" />
-                                                </a>
-                                              ) : (
-                                                <div className="text-sm font-medium text-gray-900">
-                                                  {product.name}
-                                                </div>
-                                              )}
+                                              <div className="text-sm font-medium text-gray-900">
+                                                {product.name}
+                                              </div>
                                               {product.brand && (
                                                 <div className="text-xs text-gray-500 mt-0.5">Brand: {product.brand}</div>
                                               )}
@@ -712,22 +696,6 @@ export default function Products() {
                                                     {product.specialNotes}
                                                   </span>
                                                 </div>
-                                              ) : (
-                                                <span className="text-xs text-gray-400">-</span>
-                                              )}
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
-                                              {product.imageUrl ? (
-                                                <a
-                                                  href={product.imageUrl}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="inline-flex items-center px-3 py-1.5 border border-primary-300 text-sm font-medium rounded-md text-primary-700 bg-primary-50 hover:bg-primary-100 hover:border-primary-400 transition-colors"
-                                                  title="Click to view product image"
-                                                >
-                                                  <ImageIcon className="h-4 w-4 mr-1.5" />
-                                                  View Image
-                                                </a>
                                               ) : (
                                                 <span className="text-xs text-gray-400">-</span>
                                               )}
