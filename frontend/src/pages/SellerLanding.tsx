@@ -223,64 +223,64 @@ export default function SellerLanding() {
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-50">
-            <div
-              className="absolute inset-0 bg-black/40"
-              style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <div
-              className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl p-4"
-              style={{ backgroundColor: '#fff' }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="font-semibold text-gray-900">Menu</div>
+      {/* Mobile menu (rendered OUTSIDE the header to avoid Safari/iOS backdrop-filter compositing issues) */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/40"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div
+            className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl p-4"
+            style={{ backgroundColor: '#fff' }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-gray-900">Menu</div>
+              <button
+                type="button"
+                aria-label="Close menu"
+                className="p-2 rounded-md hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X className="h-5 w-5 text-gray-700" />
+              </button>
+            </div>
+            <div className="mt-4 space-y-2">
+              {navLinks.map((l) => (
                 <button
+                  key={l.id}
                   type="button"
-                  aria-label="Close menu"
-                  className="p-2 rounded-md hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    scrollToId(l.id);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
                 >
-                  <X className="h-5 w-5 text-gray-700" />
+                  {l.label}
                 </button>
-              </div>
-              <div className="mt-4 space-y-2">
-                {navLinks.map((l) => (
-                  <button
-                    key={l.id}
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      scrollToId(l.id);
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
-                  >
-                    {l.label}
-                  </button>
-                ))}
-                <Link
-                  to="/login"
-                  className="block px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Business login
-                </Link>
-              </div>
-              <div className="mt-6 border-t pt-4 text-sm text-gray-600 space-y-2">
-                <a href={`tel:${SELL_PHONE_TEL}`} className="flex items-center gap-2 hover:text-gray-900">
-                  <Phone className="h-4 w-4" /> {SELL_PHONE}
-                </a>
-                <a href={`mailto:${SELL_EMAIL}`} className="flex items-center gap-2 hover:text-gray-900">
-                  <Mail className="h-4 w-4" /> {SELL_EMAIL}
-                </a>
-              </div>
+              ))}
+              <Link
+                to="/login"
+                className="block px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Business login
+              </Link>
+            </div>
+            <div className="mt-6 border-t pt-4 text-sm text-gray-600 space-y-2">
+              <a href={`tel:${SELL_PHONE_TEL}`} className="flex items-center gap-2 hover:text-gray-900">
+                <Phone className="h-4 w-4" /> {SELL_PHONE}
+              </a>
+              <a href={`mailto:${SELL_EMAIL}`} className="flex items-center gap-2 hover:text-gray-900">
+                <Mail className="h-4 w-4" /> {SELL_EMAIL}
+              </a>
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       {/* Hero */}
       <section className="relative overflow-hidden">
