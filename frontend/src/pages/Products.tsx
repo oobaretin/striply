@@ -563,7 +563,9 @@ export default function Products() {
                   {/* Sub-Categories */}
                   {expandedCategories.has(category.id) && category.subCategories && (
                     <div className="bg-gray-50">
-                      {category.subCategories.map((subCategory: any) => (
+                      {category.subCategories
+                        .filter((sc: any) => sc?.name !== 'Lancing devices and lancets')
+                        .map((subCategory: any) => (
                         <div key={subCategory.id} className="border-t border-gray-200">
                           {/* Sub-Category Header */}
                           <button
