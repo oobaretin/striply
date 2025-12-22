@@ -171,4 +171,21 @@ adminRoutes.post('/seed/prices', async (req: AuthRequest, res, next) => {
   }
 });
 
+/**
+ * Cleanup empty categories/subcategories (removes empty sections from the UI).
+ */
+adminRoutes.post('/cleanup/empty', async (req: AuthRequest, res, next) => {
+  try {
+    const mod = await import('../scripts/cleanupEmptyCatalog');
+    const result = await mod.cleanupEmptyCatalog();
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 
