@@ -176,9 +176,9 @@ export default function SellerLanding() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-28 flex items-center justify-between">
+          <div className="h-32 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Striply" className="h-24 w-auto" />
+              <img src="/logo.png" alt="Striply" className="h-28 w-auto" />
               <div className="hidden sm:block text-xs text-gray-500">Sell diabetic supplies • Fast, secure, simple</div>
             </div>
 
@@ -188,7 +188,7 @@ export default function SellerLanding() {
                   key={l.id}
                   type="button"
                   onClick={() => scrollToId(l.id)}
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                  className="text-base font-semibold text-gray-700 hover:text-gray-900"
                 >
                   {l.label}
                 </button>
@@ -198,7 +198,7 @@ export default function SellerLanding() {
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="hidden sm:inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                className="hidden sm:inline-flex items-center justify-center px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
               >
                 Business login
               </Link>
@@ -249,14 +249,14 @@ export default function SellerLanding() {
                       setMobileMenuOpen(false);
                       scrollToId(l.id);
                     }}
-                    className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                    className="w-full text-left px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
                   >
                     {l.label}
                   </button>
                 ))}
                 <Link
                   to="/login"
-                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  className="block px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Business login
