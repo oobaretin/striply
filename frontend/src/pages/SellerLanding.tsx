@@ -100,9 +100,9 @@ export default function SellerLanding() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-16 flex items-center justify-between">
+          <div className="h-24 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Striply" className="h-10 w-auto" />
+              <img src="/logo.png" alt="Striply" className="h-20 w-auto" />
               <div className="hidden sm:block text-xs text-gray-500">Sell diabetic supplies • Fast, secure, simple</div>
             </div>
 
@@ -511,7 +511,7 @@ export default function SellerLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <img src="/logo.png" alt="Striply" className="h-10 w-auto mb-4" />
+              <img src="/logo.png" alt="Striply" className="h-20 w-auto mb-4" />
               <p className="text-gray-400 text-sm">Sell diabetic supplies with a simple, secure process.</p>
             </div>
             <div>
