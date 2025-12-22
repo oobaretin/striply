@@ -110,7 +110,7 @@ adminRoutes.get('/seed/status', async (req: AuthRequest, res, next) => {
  *
  * Body:
  *  - { keys?: string[] } where keys can include:
- *      "charles-harris" | "chris-sampson" | "path-medical" | "ralph-walton"
+ *      "charles-harris" | "chris-sampson" | "path-medical" | "ralph-walton" | "max-med"
  *    If omitted, seeds all.
  */
 adminRoutes.post('/seed/prices', async (req: AuthRequest, res, next) => {
@@ -149,6 +149,10 @@ adminRoutes.post('/seed/prices', async (req: AuthRequest, res, next) => {
     await runIfRequested('ralph-walton', async () => {
       const mod = await import('../scripts/addRalphWaltonPrices');
       await mod.addRalphWaltonPrices();
+    });
+    await runIfRequested('max-med', async () => {
+      const mod = await import('../scripts/addMaxMedPrices');
+      await mod.addMaxMedPrices();
     });
 
     // Report current pricing coverage
