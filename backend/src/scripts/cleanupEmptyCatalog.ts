@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 export type CleanupEmptyCatalogResult = {
   deactivatedSubCategories: number;
   deactivatedCategories: number;
+  mergedDuplicateSubCategories: number;
+  movedProducts: number;
 };
 
 /**
@@ -16,12 +18,56 @@ export type CleanupEmptyCatalogResult = {
 async function cleanupEmptyCatalog(): Promise<CleanupEmptyCatalogResult> {
   let deactivatedSubCategories = 0;
   let deactivatedCategories = 0;
+  let mergedDuplicateSubCategories = 0;
+  let movedProducts = 0;
 
   const activeSubCategories = await prisma.subCategory.findMany({
     where: { isActive: true },
     select: { id: true, categoryId: true, name: true },
   });
 
+  // 1) Merge duplicate subcategories by name within the same category.
+  // Keep the one with the most ACTIVE products; move products from duplicates; deactivate duplicates.
+  const groups = new Map<string, Array<{ id: string; categoryId: string; name: string }>>();
+  for (const sc of activeSubCategories) {
+    const key = `${sc.categoryId}::${sc.name.trim().toLowerCase()}`;
+    const list = groups.get(key) || [];
+    list.push(sc);
+    groups.set(key, list);
+  }
+
+  for (const [, list] of groups) {
+    if (list.length <= 1) continue;
+
+    const counts = await Promise.all(
+      list.map(async (sc) => {
+        const activeCount = await prisma.product.count({
+          where: { isActive: true, subCategoryId: sc.id },
+        });
+        return { sc, activeCount };
+      })
+    );
+
+    counts.sort((a, b) => b.activeCount - a.activeCount);
+    const keep = counts[0].sc;
+    const toDeactivate = counts.slice(1).map((c) => c.sc);
+
+    for (const dup of toDeactivate) {
+      const moved = await prisma.product.updateMany({
+        where: { subCategoryId: dup.id },
+        data: { subCategoryId: keep.id },
+      });
+      movedProducts += moved.count;
+
+      await prisma.subCategory.update({
+        where: { id: dup.id },
+        data: { isActive: false },
+      });
+      mergedDuplicateSubCategories += 1;
+    }
+  }
+
+  // 2) Deactivate any active subcategory that still has 0 active products (post-merge).
   for (const sc of activeSubCategories) {
     const productCount = await prisma.product.count({
       where: { isActive: true, subCategoryId: sc.id },
@@ -51,7 +97,7 @@ async function cleanupEmptyCatalog(): Promise<CleanupEmptyCatalogResult> {
     }
   }
 
-  return { deactivatedSubCategories, deactivatedCategories };
+  return { deactivatedSubCategories, deactivatedCategories, mergedDuplicateSubCategories, movedProducts };
 }
 
 // Export for API usage (CommonJS + ESM)
