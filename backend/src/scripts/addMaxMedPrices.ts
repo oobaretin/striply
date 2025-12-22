@@ -47,9 +47,21 @@ async function upsertSubCategory(categoryId: string, name: string) {
 }
 
 async function upsertProduct(subCategoryId: string, row: MaxMedPriceRow) {
-  const existing = await prisma.product.findFirst({
-    where: { name: row.productName, subCategoryId },
-  });
+  // Try to find an existing product anywhere first (so we can avoid duplicates and/or move it).
+  // Priority:
+  // 1) ndcCode match (exact/contains because some stored values include extra text)
+  // 2) exact name match (case-insensitive)
+  const existing =
+    (row.ndcCode
+      ? await prisma.product.findFirst({
+          where: {
+            ndcCode: { contains: row.ndcCode },
+          },
+        })
+      : null) ||
+    (await prisma.product.findFirst({
+      where: { name: { equals: row.productName, mode: 'insensitive' } },
+    }));
 
   const data = {
     name: row.productName,
@@ -91,10 +103,20 @@ async function addMaxMedPrices() {
   console.log('💰 Adding Max Med Distributors prices...\n');
   const buyer = await getMaxMedBuyer();
 
+  // Use the existing Northeast catalog category names so Max Med pricing appears
+  // inside the same category tree on the Products page.
+  const CATS = {
+    DEXCOM: 'MEDICAL DEVICES (CGM) Dexcoms',
+    LIBRE: 'MEDICAL DEVICES (CGM) Freestyle Libres',
+    OMNIPOD: 'MEDICAL DEVICES (CGM) Insulet',
+    LANCETS: 'LANCETS',
+    INSULIN: 'INSULIN',
+  } as const;
+
   const rows: MaxMedPriceRow[] = [
     // Dexcom G6
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM SENSOR 3 PACK',
       brand: 'Dexcom',
@@ -111,7 +133,7 @@ async function addMaxMedPrices() {
       damagedPrice: 150,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM SENSOR 3 PACK',
       brand: 'Dexcom',
@@ -127,7 +149,7 @@ async function addMaxMedPrices() {
       damagedPrice: 150,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM SENSOR 3 PACK',
       brand: 'Dexcom',
@@ -143,7 +165,7 @@ async function addMaxMedPrices() {
       damagedPrice: 150,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM SENSOR 3 PACK',
       brand: 'Dexcom',
@@ -159,7 +181,7 @@ async function addMaxMedPrices() {
       damagedPrice: 150,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM SENSOR 1 PACK (BOX)',
       brand: 'Dexcom',
@@ -175,7 +197,7 @@ async function addMaxMedPrices() {
       damagedPrice: 25,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM SENSOR 1 PACK (NO BOX) (LOOSE)',
       brand: 'Dexcom',
@@ -184,7 +206,7 @@ async function addMaxMedPrices() {
       expirationRange1Price: 40,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -194,7 +216,7 @@ async function addMaxMedPrices() {
       dingReductionPrice: 10,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -203,7 +225,7 @@ async function addMaxMedPrices() {
       expirationRange1Price: 120,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -212,7 +234,7 @@ async function addMaxMedPrices() {
       expirationRange1Price: 100,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -221,7 +243,7 @@ async function addMaxMedPrices() {
       expirationRange1Price: 100,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM TRANSMITTER KIT',
       brand: 'Dexcom',
@@ -238,7 +260,7 @@ async function addMaxMedPrices() {
       damagedPrice: 85,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM TRANSMITTER SMALL BOX',
       brand: 'Dexcom',
@@ -253,7 +275,7 @@ async function addMaxMedPrices() {
       expirationRange4Price: 30,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
       productName: 'DEXCOM TRANSMITTER SMALL BOX',
       brand: 'Dexcom',
@@ -270,7 +292,7 @@ async function addMaxMedPrices() {
 
     // Dexcom G7
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM SENSOR 1 PACK',
       brand: 'Dexcom',
@@ -287,7 +309,7 @@ async function addMaxMedPrices() {
       damagedPrice: 50,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM SENSOR 1 PACK',
       brand: 'Dexcom',
@@ -303,7 +325,7 @@ async function addMaxMedPrices() {
       damagedPrice: 50,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM SENSOR 1 PACK',
       brand: 'Dexcom',
@@ -319,7 +341,7 @@ async function addMaxMedPrices() {
       damagedPrice: 50,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM SENSOR 1 PACK',
       brand: 'Dexcom',
@@ -329,7 +351,7 @@ async function addMaxMedPrices() {
       damagedPrice: 20,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -339,7 +361,7 @@ async function addMaxMedPrices() {
       dingReductionPrice: 10,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -348,7 +370,7 @@ async function addMaxMedPrices() {
       expirationRange1Price: 140,
     },
     {
-      categoryName: 'CGM',
+      categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
       productName: 'DEXCOM RECEIVER 1 PACK',
       brand: 'Dexcom',
@@ -359,8 +381,8 @@ async function addMaxMedPrices() {
 
     // Libre
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 3',
       brand: 'Abbott',
       model: 'Libre 3',
@@ -376,8 +398,8 @@ async function addMaxMedPrices() {
       damagedPrice: 30,
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 3 PLUS',
       brand: 'Abbott',
       model: 'Libre 3 Plus',
@@ -392,8 +414,8 @@ async function addMaxMedPrices() {
       damagedPrice: 35,
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 2 & LIBRE 2 PLUS',
       brand: 'Abbott',
       model: 'Libre 2 / Libre 2 Plus',
@@ -408,8 +430,8 @@ async function addMaxMedPrices() {
       damagedPrice: 25,
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'LIBRE 2 PLUS (NFR)',
       brand: 'Abbott',
       model: 'Libre 2 Plus',
@@ -418,8 +440,8 @@ async function addMaxMedPrices() {
       specialNotes: 'NFR',
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 14 DAY',
       brand: 'Abbott',
       model: 'Libre 14 Day',
@@ -434,8 +456,8 @@ async function addMaxMedPrices() {
       damagedPrice: 25,
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 3 READER',
       brand: 'Abbott',
       model: 'Libre 3 Reader',
@@ -444,8 +466,8 @@ async function addMaxMedPrices() {
       damagedPrice: 25,
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 2 READER',
       brand: 'Abbott',
       model: 'Libre 2 Reader',
@@ -454,8 +476,8 @@ async function addMaxMedPrices() {
       damagedPrice: 25,
     },
     {
-      categoryName: 'CGM',
-      subCategoryName: 'FreeStyle Libre',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE LIBRE 14 DAY READER',
       brand: 'Abbott',
       model: 'Libre 14 Day Reader',
@@ -463,9 +485,10 @@ async function addMaxMedPrices() {
       expirationRange1Price: 50,
       damagedPrice: 25,
     },
+    // (No dedicated "Meters" category in the Northeast seed tree; keep this within Libres)
     {
-      categoryName: 'Meters & Accessories',
-      subCategoryName: 'Meters',
+      categoryName: CATS.LIBRE,
+      subCategoryName: 'Freestyle Libre',
       productName: 'FREESTYLE METER',
       brand: 'Abbott',
       model: 'FreeStyle Meter',
@@ -475,7 +498,7 @@ async function addMaxMedPrices() {
 
     // Lancets
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Lancets',
       productName: 'FreeStyle Lancet',
       brand: 'Abbott',
@@ -485,7 +508,7 @@ async function addMaxMedPrices() {
       damagedPrice: 1,
     },
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Lancets',
       productName: 'One Touch Delica Lancet 30g',
       brand: 'OneTouch',
@@ -494,7 +517,7 @@ async function addMaxMedPrices() {
       damagedPrice: 1,
     },
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Lancets',
       productName: 'One Touch Delica Lancet 33g',
       brand: 'OneTouch',
@@ -503,7 +526,7 @@ async function addMaxMedPrices() {
       damagedPrice: 1,
     },
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Lancets',
       productName: 'Accu-chek FastClix',
       brand: 'Accu-Chek',
@@ -512,7 +535,7 @@ async function addMaxMedPrices() {
       damagedPrice: 1,
     },
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Lancets',
       productName: 'Accu-chek SoftClix',
       brand: 'Accu-Chek',
@@ -521,7 +544,7 @@ async function addMaxMedPrices() {
       damagedPrice: 1,
     },
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Lancets',
       productName: 'Microlets',
       brand: 'Microlet',
@@ -532,7 +555,9 @@ async function addMaxMedPrices() {
 
     // BD Needles
     {
-      categoryName: 'Supplies',
+      // Northeast seed doesn't have a dedicated "Needles" category;
+      // keep these under the existing LANCETS category tree.
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Needles',
       productName: 'BD Needles (Retail)',
       brand: 'BD',
@@ -548,7 +573,7 @@ async function addMaxMedPrices() {
       damagedPrice: 9,
     },
     {
-      categoryName: 'Supplies',
+      categoryName: CATS.LANCETS,
       subCategoryName: 'Needles',
       productName: 'BD Needles (DME/MO)',
       brand: 'BD',
@@ -562,8 +587,8 @@ async function addMaxMedPrices() {
 
     // Vials
     {
-      categoryName: 'Insulin',
-      subCategoryName: 'Vials',
+      categoryName: CATS.INSULIN,
+      subCategoryName: 'Humulin',
       productName: 'Humulin vials N',
       brand: 'Humulin',
       expirationRange1Label: '7/2026+',
@@ -572,8 +597,8 @@ async function addMaxMedPrices() {
       damagedPrice: 5,
     },
     {
-      categoryName: 'Insulin',
-      subCategoryName: 'Vials',
+      categoryName: CATS.INSULIN,
+      subCategoryName: 'Humulin',
       productName: 'Humulin vials R',
       brand: 'Humulin',
       expirationRange1Label: '7/2026+',
@@ -582,8 +607,8 @@ async function addMaxMedPrices() {
       damagedPrice: 5,
     },
     {
-      categoryName: 'Insulin',
-      subCategoryName: 'Vials',
+      categoryName: CATS.INSULIN,
+      subCategoryName: 'Humulin',
       productName: 'Humulin vials 70/30',
       brand: 'Humulin',
       expirationRange1Label: '7/2026+',
@@ -592,8 +617,8 @@ async function addMaxMedPrices() {
       damagedPrice: 5,
     },
     {
-      categoryName: 'Insulin',
-      subCategoryName: 'Vials',
+      categoryName: CATS.INSULIN,
+      subCategoryName: 'Novolin',
       productName: 'Novolins (All Kinds)',
       brand: 'NovoLin',
       expirationRange1Label: '7/2026+',
