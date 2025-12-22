@@ -30,6 +30,9 @@ export default function SellerLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [productOptions, setProductOptions] = useState<string[]>([]);
+  const [productOptionsLoading, setProductOptionsLoading] = useState(false);
+  const [productOptionsError, setProductOptionsError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -65,6 +68,37 @@ export default function SellerLanding() {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [showForm]);
+
+  useEffect(() => {
+    if (!showForm) return;
+    if (productOptionsLoading) return;
+    if (productOptions.length > 0) return;
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+    const base = apiUrl.endsWith('/api') ? apiUrl : apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
+
+    setProductOptionsError(null);
+    setProductOptionsLoading(true);
+
+    fetch(`${base}/public/products`)
+      .then((r) => r.json())
+      .then((d) => {
+        const list = Array.isArray(d?.data) ? d.data : [];
+        const options = list
+          .map((p: any) => {
+            const name = String(p?.name ?? '').trim();
+            const ndc = String(p?.ndcCode ?? '').trim();
+            if (!name) return null;
+            return ndc ? `${name} — ${ndc}` : name;
+          })
+          .filter(Boolean);
+        setProductOptions(options);
+      })
+      .catch(() => {
+        setProductOptionsError('Unable to load product list. You can still type your brand manually.');
+      })
+      .finally(() => setProductOptionsLoading(false));
+  }, [showForm, productOptions.length, productOptionsLoading]);
 
   const benefits = [
     { icon: DollarSign, title: 'Competitive offers', description: 'Transparent quotes based on brand and expiration.' },
@@ -441,7 +475,7 @@ export default function SellerLanding() {
                 </button>
               </div>
 
-              <div className="px-6 py-5">
+              <div className="px-6 py-5 max-h-[78vh] overflow-y-auto">
                 {submitted ? (
                   <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4">
                     <div className="font-semibold text-emerald-900">Thanks — we received your request.</div>
@@ -461,6 +495,11 @@ export default function SellerLanding() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    <datalist id="striplyProductOptions">
+                      {productOptions.map((opt) => (
+                        <option key={opt} value={opt} />
+                      ))}
+                    </datalist>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Full Name *</label>
                       <input
@@ -510,12 +549,19 @@ export default function SellerLanding() {
 
                     <div className="rounded-xl border border-gray-200 p-4">
                       <div className="text-sm font-semibold text-gray-900">Test Strips Brand? *</div>
+                      {productOptionsLoading && (
+                        <div className="mt-2 text-xs text-gray-500">Loading product list…</div>
+                      )}
+                      {productOptionsError && (
+                        <div className="mt-2 text-xs text-amber-700">{productOptionsError}</div>
+                      )}
                       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs font-medium text-gray-600">Brand *</label>
                           <input
                             type="text"
                             required
+                            list="striplyProductOptions"
                             value={formData.brand1}
                             onChange={(e) => setFormData({ ...formData, brand1: e.target.value })}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
@@ -554,6 +600,7 @@ export default function SellerLanding() {
                           <label className="block text-xs font-medium text-gray-600">Brand</label>
                           <input
                             type="text"
+                            list="striplyProductOptions"
                             value={formData.brand2}
                             onChange={(e) => setFormData({ ...formData, brand2: e.target.value })}
                             placeholder="If no, leave blank"

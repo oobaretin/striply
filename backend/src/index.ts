@@ -11,6 +11,7 @@ import { saleRoutes } from './routes/sales';
 import { dashboardRoutes } from './routes/dashboard';
 import { categoryRoutes } from './routes/categories';
 import { adminRoutes } from './routes/admin';
+import { publicRoutes } from './routes/public';
 
 dotenv.config();
 
@@ -76,6 +77,7 @@ app.get('/', (req, res) => {
       dashboard: '/api/dashboard',
       categories: '/api/categories',
       admin: '/api/admin',
+      public: '/api/public',
     },
   });
 });
@@ -95,6 +97,7 @@ app.use('/api/sales', saleRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
