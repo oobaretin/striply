@@ -114,13 +114,13 @@ async function addMaxMedPrices() {
   } as const;
 
   const rows: MaxMedPriceRow[] = [
-    // Dexcom G6
+    // Dexcom G6 (map to existing Northeast product names)
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM SENSOR 3 PACK',
+      productName: 'Dexcom G6 Sensor 3 Pack Retail',
       brand: 'Dexcom',
-      model: 'G6 (OE)',
+      model: 'OE',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 250,
       expirationRange2Label: '5/2026',
@@ -135,9 +135,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM SENSOR 3 PACK',
+      productName: 'Dexcom G6 Sensor 3 Pack Mail order',
       brand: 'Dexcom',
-      model: 'G6 (OR)',
+      model: 'OR',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 240,
       expirationRange2Label: '5/2026',
@@ -151,9 +151,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM SENSOR 3 PACK',
+      productName: 'Dexcom G6 Sensor 3 Pack DME',
       brand: 'Dexcom',
-      model: 'G6 (OM)',
+      model: 'OM',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 190,
       expirationRange2Label: '5/2026',
@@ -167,9 +167,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM SENSOR 3 PACK',
+      productName: 'Dexcom G6 Sensor 3 Pack DME',
       brand: 'Dexcom',
-      model: 'G6 (GS)',
+      model: 'GS',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 150,
       expirationRange2Label: '5/2026',
@@ -179,13 +179,14 @@ async function addMaxMedPrices() {
       expirationRange4Label: '3/2026',
       expirationRange4Price: 100,
       damagedPrice: 150,
+      specialNotes: 'GS reference (Max Med sheet)',
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM SENSOR 1 PACK (BOX)',
+      productName: 'Dexcom G6 Sensor 3 Pack Retail',
       brand: 'Dexcom',
-      model: 'G6 (OR & OM)',
+      model: '1-pack (box), OR & OM',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 50,
       expirationRange2Label: '5/2026',
@@ -195,22 +196,24 @@ async function addMaxMedPrices() {
       expirationRange4Label: '3/2026',
       expirationRange4Price: 25,
       damagedPrice: 25,
+      specialNotes: 'Max Med: SENSOR 1 PACK (BOX) pricing recorded here (no dedicated product in seed)',
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM SENSOR 1 PACK (NO BOX) (LOOSE)',
+      productName: 'Dexcom G6 Sensor 3 Pack Retail',
       brand: 'Dexcom',
-      model: 'G6 (OR & OM)',
+      model: '1-pack (loose), OR & OM',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 40,
+      specialNotes: 'Max Med: SENSOR 1 PACK (LOOSE) pricing recorded here (no dedicated product in seed)',
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G6 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G6 (OE)',
+      model: 'OE',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 140,
       dingReductionPrice: 10,
@@ -218,36 +221,36 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G6 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G6 (FR)',
+      model: 'FR',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 120,
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G6 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G6 (FK)',
+      model: 'FK',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 100,
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G6 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G6 (OM)',
+      model: 'OM',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 100,
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM TRANSMITTER KIT',
+      productName: 'Dexcom G6 Transmitter Kit',
       brand: 'Dexcom',
-      model: 'G6 (OE)',
+      model: 'OE',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 150,
       expirationRange2Label: '5/2026',
@@ -262,9 +265,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM TRANSMITTER SMALL BOX',
+      productName: 'Dexcom G6 Transmitter 1 pack',
       brand: 'Dexcom',
-      model: 'G6 (OR)',
+      model: 'OR (small box)',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 100,
       expirationRange2Label: '5/2026',
@@ -277,9 +280,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G6',
-      productName: 'DEXCOM TRANSMITTER SMALL BOX',
+      productName: 'Dexcom G6 Transmitter 1 pack',
       brand: 'Dexcom',
-      model: 'G6 (OM)',
+      model: 'OM (small box)',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 100,
       expirationRange2Label: '5/2026',
@@ -290,13 +293,13 @@ async function addMaxMedPrices() {
       expirationRange4Price: 30,
     },
 
-    // Dexcom G7
+    // Dexcom G7 (map to existing Northeast product names)
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM SENSOR 1 PACK',
+      productName: 'Dexcom G7 Retail Sensor',
       brand: 'Dexcom',
-      model: 'G7 (O12)',
+      model: 'O12',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 90,
       expirationRange2Label: '5/2026',
@@ -311,9 +314,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM SENSOR 1 PACK',
+      productName: 'Dexcom G7 Retail Sensor OR',
       brand: 'Dexcom',
-      model: 'G7 (O11)',
+      model: 'O11',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 80,
       expirationRange2Label: '5/2026',
@@ -327,9 +330,9 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM SENSOR 1 PACK',
+      productName: 'Dexcom Sensor G7 DME',
       brand: 'Dexcom',
-      model: 'G7 (O13)',
+      model: 'O13',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 75,
       expirationRange2Label: '5/2026',
@@ -343,19 +346,20 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM SENSOR 1 PACK',
+      productName: 'Dexcom Sensor G7 DME',
       brand: 'Dexcom',
-      model: 'G7 (O30)',
+      model: 'O30',
       expirationRange1Label: '6/2026+',
       expirationRange1Price: 40,
       damagedPrice: 20,
+      specialNotes: 'O30 reference (Max Med sheet)',
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G7 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G7 (O12)',
+      model: 'O12',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 150,
       dingReductionPrice: 10,
@@ -363,27 +367,27 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G7 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G7 (O11)',
+      model: 'O11',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 140,
     },
     {
       categoryName: CATS.DEXCOM,
       subCategoryName: 'Dexcom G7',
-      productName: 'DEXCOM RECEIVER 1 PACK',
+      productName: 'Dexcom G7 Receiver 1pk',
       brand: 'Dexcom',
-      model: 'G7 (O13)',
+      model: 'O13',
       expirationRange1Label: 'No expiry (manufacture date only)',
       expirationRange1Price: 130,
     },
 
-    // Libre
+    // Libre (map to existing Northeast product names)
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 3',
+      productName: 'Freestyle Libre 3 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 3',
       expirationRange1Label: '3/2026+',
@@ -400,7 +404,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 3 PLUS',
+      productName: 'Freestyle Libre 3 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 3 Plus',
       expirationRange1Label: '3/2026+',
@@ -416,7 +420,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 2 & LIBRE 2 PLUS',
+      productName: 'Freestyle Libre2 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 2 / Libre 2 Plus',
       expirationRange1Label: '3/2026+',
@@ -432,7 +436,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'LIBRE 2 PLUS (NFR)',
+      productName: 'Freestyle Libre2 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 2 Plus',
       expirationRange1Label: '3/2026+',
@@ -442,7 +446,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 14 DAY',
+      productName: 'Freestlye Libre 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 14 Day',
       expirationRange1Label: '3/2026+',
@@ -458,42 +462,46 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 3 READER',
+      productName: 'Freestyle Libre 3 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 3 Reader',
       expirationRange1Label: "No expiry (reader's don't expire)",
       expirationRange1Price: 50,
       damagedPrice: 25,
+      specialNotes: 'Reader pricing (Max Med sheet) recorded here (no dedicated reader product in seed)',
     },
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 2 READER',
+      productName: 'Freestyle Libre2 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 2 Reader',
       expirationRange1Label: "No expiry (reader's don't expire)",
       expirationRange1Price: 50,
       damagedPrice: 25,
+      specialNotes: 'Reader pricing (Max Med sheet) recorded here (no dedicated reader product in seed)',
     },
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE LIBRE 14 DAY READER',
+      productName: 'Freestlye Libre 14 Day Sensor',
       brand: 'Abbott',
       model: 'Libre 14 Day Reader',
       expirationRange1Label: "No expiry (reader's don't expire)",
       expirationRange1Price: 50,
       damagedPrice: 25,
+      specialNotes: 'Reader pricing (Max Med sheet) recorded here (no dedicated reader product in seed)',
     },
     // (No dedicated "Meters" category in the Northeast seed tree; keep this within Libres)
     {
       categoryName: CATS.LIBRE,
       subCategoryName: 'Freestyle Libre',
-      productName: 'FREESTYLE METER',
+      productName: 'Freestyle Libre 3 14 Day Sensor',
       brand: 'Abbott',
       model: 'FreeStyle Meter',
       expirationRange1Label: 'N/A',
       expirationRange1Price: 10,
+      specialNotes: 'Meter pricing (Max Med sheet) recorded here (no dedicated meter product in seed)',
     },
 
     // Lancets
@@ -589,7 +597,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.INSULIN,
       subCategoryName: 'Humulin',
-      productName: 'Humulin vials N',
+      productName: 'Humulin N Vial',
       brand: 'Humulin',
       expirationRange1Label: '7/2026+',
       expirationRange1Price: 25,
@@ -599,7 +607,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.INSULIN,
       subCategoryName: 'Humulin',
-      productName: 'Humulin vials R',
+      productName: 'Humulin R Vial',
       brand: 'Humulin',
       expirationRange1Label: '7/2026+',
       expirationRange1Price: 25,
@@ -609,7 +617,7 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.INSULIN,
       subCategoryName: 'Humulin',
-      productName: 'Humulin vials 70/30',
+      productName: 'Humulin 7030 Vial',
       brand: 'Humulin',
       expirationRange1Label: '7/2026+',
       expirationRange1Price: 25,
@@ -619,12 +627,13 @@ async function addMaxMedPrices() {
     {
       categoryName: CATS.INSULIN,
       subCategoryName: 'Novolin',
-      productName: 'Novolins (All Kinds)',
+      productName: 'Novolin N Relion',
       brand: 'NovoLin',
       expirationRange1Label: '7/2026+',
       expirationRange1Price: 20,
       dingReductionPrice: 5,
       damagedPrice: 5,
+      specialNotes: 'Max Med sheet: "Novolins (All Kinds)" recorded here (no 1:1 product list)',
     },
   ];
 
@@ -694,6 +703,26 @@ async function addMaxMedPrices() {
     });
 
     upsertedPrices += 1;
+  }
+
+  // Deactivate legacy "import-only" categories that were created by earlier versions
+  // of this importer so they stop showing up as separate sections in the UI.
+  const legacyCategoryNames = ['CGM', 'Supplies', 'Insulin', 'Meters & Accessories'];
+  for (const name of legacyCategoryNames) {
+    const cat = await prisma.category.findFirst({
+      where: { name },
+      include: {
+        subCategories: {
+          include: { products: { select: { id: true } } },
+        },
+      },
+    });
+    if (!cat) continue;
+    const productCount = cat.subCategories.reduce((acc, sc) => acc + (sc.products?.length || 0), 0);
+    if (productCount > 0) continue; // don't deactivate if it still contains products
+
+    await prisma.category.update({ where: { id: cat.id }, data: { isActive: false } });
+    await prisma.subCategory.updateMany({ where: { categoryId: cat.id }, data: { isActive: false } });
   }
 
   console.log(`✅ Max Med import complete: ${upsertedPrices} prices upserted, ${createdProducts} products created.`);
