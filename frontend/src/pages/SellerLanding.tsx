@@ -121,20 +121,32 @@ export default function SellerLanding() {
 
   const faqs = [
     {
-      q: 'What items do you buy?',
-      a: 'Mostly diabetic supplies (depending on brand/expiration). Contact us for a quick quote.',
+      q: 'Is it legal to sell my extra diabetic supplies?',
+      a: 'In general, yes—if you are the legal owner of the items. If you purchased them yourself or received them legally (including through insurance), you can request a quote and sell them. If you have questions about your specific situation, contact us.',
     },
     {
-      q: 'How do I get a quote?',
-      a: 'Call or email us, or tap “Get a quote” to send your details.',
+      q: 'Should I remove my pharmacy labels?',
+      a: 'No—please do not remove the label. If you’d like, you may cover your personal information with a soft black marker. Please do not mark directly on the box.',
     },
     {
-      q: 'When do I get paid?',
-      a: 'After items are received and verified. Turnaround depends on shipping/verification.',
+      q: 'How does the payment process work?',
+      a: 'We can pay via Zelle, Venmo, Cash App, or PayPal (your preferred method). We release payment within 24 business hours of receiving your shipment and send a confirmation email.',
     },
     {
-      q: 'Do you accept expired or damaged boxes?',
-      a: 'Some buyers do. We’ll confirm eligibility during quoting.',
+      q: 'Who pays for the shipping?',
+      a: 'We cover all shipping costs. Fill out the form and we’ll send you a prepaid shipping label. Package your items and drop them off—easy.',
+    },
+    {
+      q: 'Damage guidelines',
+      a: 'We value transparency. If the box is damaged but still factory sealed, we may accept it at a discounted rate based on the product and expiration. Even small damage lowers resale value significantly.',
+    },
+    {
+      q: 'Do you accept damaged boxes?',
+      a: 'Yes—however, we need to see a picture of the damage.',
+    },
+    {
+      q: 'Why don’t you accept opened boxes (even if tubes are intact)?',
+      a: 'We have no way to verify they haven’t been tampered with, so we can’t accept opened boxes.',
     },
   ];
 
