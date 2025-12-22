@@ -262,18 +262,6 @@ export default function SellerLanding() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 rounded-xl bg-emerald-50 border border-emerald-100 p-4">
-                <div className="text-xs font-semibold text-emerald-900">Business owners</div>
-                <div className="mt-1 text-sm text-emerald-900">
-                  Manage buyers, products, and pricing in the Striply dashboard.
-                </div>
-                <Link
-                  to="/login"
-                  className="mt-3 inline-flex items-center text-sm font-semibold text-emerald-700 hover:text-emerald-900"
-                >
-                  Go to business login <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </div>
             </div>
           </div>
         </div>

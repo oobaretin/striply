@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../lib/api';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -72,11 +72,19 @@ export default function Login({ onLogin }: LoginProps) {
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
+            Manage buyers, products, and pricing in the Striply dashboard.
+          </p>
+          <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
             <a href="/register" className="font-medium text-primary-600 hover:text-primary-500">
               create a new account
             </a>
           </p>
+          <div className="mt-4 text-center">
+            <Link to="/sell" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+              ← Back to seller landing
+            </Link>
+          </div>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
