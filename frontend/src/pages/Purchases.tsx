@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { purchasesApi, customersApi, productsApi } from '../lib/api';
+import { Link } from 'react-router-dom';
+import { SK, loadJson, saveJson, getProductCatalog } from '../lib/localData';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -9,6 +10,7 @@ export default function Purchases() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [editingPurchase, setEditingPurchase] = useState<any>(null);
   const [formData, setFormData] = useState({
     customerId: '',
@@ -18,53 +20,80 @@ export default function Purchases() {
     items: [{ productId: '', quantity: 1, unitPrice: 0, expirationDate: '', lotNumber: '' }],
   });
 
+  const loadData = () => {
+    setLoading(true);
+    setPurchases(loadJson<any[]>(SK.purchases, []));
+    setCustomers(loadJson<any[]>(SK.customers, []));
+    setProducts(getProductCatalog().filter((p: any) => p.isActive !== false));
+    setLoading(false);
+  };
+
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    try {
-      const [purchasesRes, customersRes, productsRes] = await Promise.all([
-        purchasesApi.getAll(),
-        customersApi.getAll({ isActive: true }),
-        productsApi.getAll({ isActive: true }),
-      ]);
-      if (purchasesRes.success) setPurchases(purchasesRes.data);
-      if (customersRes.success) setCustomers(customersRes.data);
-      if (productsRes.success) setProducts(productsRes.data);
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const purchaseData = {
-        ...formData,
-        items: formData.items.filter((item) => item.productId && item.quantity > 0),
-      };
-      if (editingPurchase) {
-        await purchasesApi.update(editingPurchase.id, purchaseData);
-      } else {
-        await purchasesApi.create(purchaseData);
-      }
-      setShowModal(false);
-      setEditingPurchase(null);
-      resetForm();
-      loadData();
-    } catch (error) {
-      console.error('Failed to save purchase:', error);
+    setFormError(null);
+
+    const customer = customers.find((c) => c.id === formData.customerId);
+    if (!customer) {
+      const message =
+        customers.length === 0
+          ? 'Add a seller on the Sellers page before logging a purchase.'
+          : 'Select a seller to continue.';
+      setFormError(message);
+      return;
     }
+
+    const catalog = getProductCatalog();
+    const rawItems = formData.items.filter((item) => item.productId && item.quantity > 0);
+    if (rawItems.length === 0) {
+      setFormError('Add at least one line item with a product and quantity.');
+      return;
+    }
+
+    const items = rawItems.map((item) => {
+      const p = catalog.find((x: any) => x.id === item.productId);
+      return {
+        productId: item.productId,
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.unitPrice),
+        expirationDate: item.expirationDate || null,
+        lotNumber: item.lotNumber || '',
+        product: p ? { name: p.name, ndcCode: p.ndcCode } : { name: 'Unknown', ndcCode: '' },
+      };
+    });
+    const totalAmount = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+    const payload = {
+      id: editingPurchase?.id ?? crypto.randomUUID(),
+      customerId: formData.customerId,
+      customer: { firstName: customer.firstName, lastName: customer.lastName },
+      purchaseDate: formData.purchaseDate,
+      purchaseMethod: formData.purchaseMethod,
+      notes: formData.notes,
+      items,
+      totalAmount,
+    };
+
+    const next = editingPurchase
+      ? purchases.map((x) => (x.id === editingPurchase.id ? payload : x))
+      : [...purchases, payload];
+    if (!saveJson(SK.purchases, next)) {
+      setFormError('Could not save — browser storage may be full. Try clearing old data or use another browser.');
+      return;
+    }
+    setPurchases(next);
+    setShowModal(false);
+    setEditingPurchase(null);
+    resetForm();
   };
 
   const handleEdit = (purchase: any) => {
     setEditingPurchase(purchase);
     setFormData({
       customerId: purchase.customerId,
-      purchaseDate: purchase.purchaseDate.split('T')[0],
+      purchaseDate: String(purchase.purchaseDate).split('T')[0],
       purchaseMethod: purchase.purchaseMethod || 'in-person',
       notes: purchase.notes || '',
       items: purchase.items.map((item: any) => ({
@@ -78,14 +107,11 @@ export default function Purchases() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this purchase?')) {
-      try {
-        await purchasesApi.delete(id);
-        loadData();
-      } catch (error) {
-        console.error('Failed to delete purchase:', error);
-      }
+      const next = purchases.filter((p) => p.id !== id);
+      saveJson(SK.purchases, next);
+      setPurchases(next);
     }
   };
 
@@ -110,6 +136,7 @@ export default function Purchases() {
   };
 
   const resetForm = () => {
+    setFormError(null);
     setFormData({
       customerId: '',
       purchaseDate: new Date().toISOString().split('T')[0],
@@ -123,7 +150,7 @@ export default function Purchases() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Purchases</h1>
+          <h2 className="text-3xl font-bold text-gray-900">Purchases</h2>
           <p className="mt-2 text-sm text-gray-600">Track purchases from sellers (online or in-person)</p>
         </div>
         <button
@@ -186,18 +213,34 @@ export default function Purchases() {
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowModal(false)}></div>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} noValidate>
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[80vh] overflow-y-auto">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                     {editingPurchase ? 'Edit Purchase' : 'Add Purchase'}
                   </h3>
+                  {formError && (
+                    <div className="mb-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-800" role="alert">
+                      {formError}
+                      {customers.length === 0 && (
+                        <>
+                          {' '}
+                          <Link to="/customers" className="font-medium underline" onClick={() => setShowModal(false)}>
+                            Add a seller
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  )}
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Seller / Supplier *</label>
                       <select
                         required
                         value={formData.customerId}
-                        onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
+                        onChange={(e) => {
+                          setFormError(null);
+                          setFormData({ ...formData, customerId: e.target.value });
+                        }}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                       >
                         <option value="">Select a seller</option>
@@ -207,6 +250,15 @@ export default function Purchases() {
                           </option>
                         ))}
                       </select>
+                      {customers.length === 0 && (
+                        <p className="mt-2 text-sm text-amber-700">
+                          No sellers yet.{' '}
+                          <Link to="/customers" className="font-medium underline" onClick={() => setShowModal(false)}>
+                            Add one on the Sellers page
+                          </Link>{' '}
+                          first.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Purchase Date</label>

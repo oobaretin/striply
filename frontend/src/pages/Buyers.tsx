@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { buyersApi } from '../lib/api';
+import { useEffect, useMemo, useState } from 'react';
+import { SK, loadBuyersOrSeed, saveJson } from '../lib/localData';
+import { SEED_BUYERS } from '../lib/seedBuyersData';
 import { Plus, Search, Edit, Trash2, Star, ExternalLink } from 'lucide-react';
 
 export default function Buyers() {
   const [buyers, setBuyers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingBuyer, setEditingBuyer] = useState<any>(null);
@@ -30,44 +30,35 @@ export default function Buyers() {
   });
 
   useEffect(() => {
-    loadBuyers();
+    setBuyers(loadBuyersOrSeed());
   }, []);
 
-  const loadBuyers = async () => {
-    try {
-      const response = await buyersApi.getAll({ search: searchTerm || undefined });
-      if (response.success) {
-        setBuyers(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to load buyers:', error);
-    } finally {
-      setLoading(false);
-    }
+  const persist = (next: any[]) => {
+    setBuyers(next);
+    saveJson(SK.buyers, next);
   };
 
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      loadBuyers();
-    }, 300);
-    return () => clearTimeout(debounce);
-  }, [searchTerm]);
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return buyers;
+    return buyers.filter(
+      (b) =>
+        `${b.firstName} ${b.lastName}`.toLowerCase().includes(q) ||
+        String(b.phone || '').includes(q) ||
+        String(b.email || '').toLowerCase().includes(q)
+    );
+  }, [buyers, searchTerm]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (editingBuyer) {
-        await buyersApi.update(editingBuyer.id, formData);
-      } else {
-        await buyersApi.create(formData);
-      }
-      setShowModal(false);
-      setEditingBuyer(null);
-      resetForm();
-      loadBuyers();
-    } catch (error) {
-      console.error('Failed to save buyer:', error);
+    if (editingBuyer) {
+      persist(buyers.map((b) => (b.id === editingBuyer.id ? { ...b, ...formData, id: b.id } : b)));
+    } else {
+      persist([...buyers, { id: crypto.randomUUID(), ...formData }]);
     }
+    setShowModal(false);
+    setEditingBuyer(null);
+    resetForm();
   };
 
   const handleEdit = (buyer: any) => {
@@ -95,14 +86,9 @@ export default function Buyers() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to deactivate this buyer?')) {
-      try {
-        await buyersApi.delete(id);
-        loadBuyers();
-      } catch (error) {
-        console.error('Failed to delete buyer:', error);
-      }
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to remove this buyer?')) {
+      persist(buyers.filter((b) => b.id !== id));
     }
   };
 
@@ -129,13 +115,31 @@ export default function Buyers() {
     });
   };
 
+  const handleAddDefaultBuyers = () => {
+    const existingIds = new Set(buyers.map((b) => b.id));
+    const toAdd = SEED_BUYERS.filter((b) => !existingIds.has(b.id)).map((b) => ({ ...b }));
+    if (toAdd.length === 0) {
+      alert('All default buyers are already in your list.');
+      return;
+    }
+    persist([...buyers, ...toAdd]);
+  };
+
   return (
     <div className="px-4 py-6 sm:px-0">
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Buyers</h1>
+          <h2 className="text-3xl font-bold text-gray-900">Buyers</h2>
           <p className="mt-2 text-sm text-gray-600">Manage your resale customers</p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleAddDefaultBuyers}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Add default buyers
+          </button>
         <button
           onClick={() => {
             setEditingBuyer(null);
@@ -147,6 +151,7 @@ export default function Buyers() {
           <Plus className="h-4 w-4 mr-2" />
           Add Buyer
         </button>
+        </div>
       </div>
 
       <div className="mb-4">
@@ -162,12 +167,9 @@ export default function Buyers() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-center py-12">Loading...</div>
-      ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {buyers.map((buyer) => (
+      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul className="divide-y divide-gray-200">
+          {filtered.map((buyer) => (
               <li key={buyer.id}>
                 <div className="px-4 py-4 sm:px-6">
                   <div className="flex items-center justify-between">
@@ -213,10 +215,9 @@ export default function Buyers() {
                   </div>
                 </div>
               </li>
-            ))}
-          </ul>
-        </div>
-      )}
+          ))}
+        </ul>
+      </div>
 
       {showModal && (
         <div className="fixed z-10 inset-0 overflow-y-auto">

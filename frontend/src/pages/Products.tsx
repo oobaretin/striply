@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { categoriesApi, buyersApi } from '../lib/api';
+import { SK, loadCategoriesOrSeed, loadBuyersOrSeed, saveJson } from '../lib/localData';
+import { SEED_CATEGORIES } from '../lib/seedCategoriesData';
 import { ChevronDown, ChevronRight, AlertCircle, TrendingUp, DollarSign, Settings } from 'lucide-react';
 
 export default function Products() {
@@ -91,58 +92,41 @@ export default function Products() {
     return list;
   }, [buyers]);
 
-  // Hide the "Test Strips" category section on the Products page (UI-only)
-  const displayCategories = useMemo(() => {
-    const hiddenNames = new Set(['test strips', 'lancing devices and lancets']);
-    const norm = (v: any) => String(v ?? '').trim().toLowerCase();
-    return categories.filter((c) => !hiddenNames.has(norm(c?.name)));
-  }, [categories]);
+  const displayCategories = useMemo(() => categories, [categories]);
 
-  const loadData = async () => {
+  const loadData = () => {
+    setError(null);
+    setLoading(true);
     try {
-      setError(null);
-      setLoading(true);
-      
-      // Load categories and buyers in parallel
-      const [categoriesResponse, buyersResponse] = await Promise.all([
-        categoriesApi.getAll(),
-        buyersApi.getAll({ isActive: true }),
-      ]);
+      const categoriesData = loadCategoriesOrSeed();
+      const buyersData = loadBuyersOrSeed().filter((b: any) => b?.isActive !== false);
 
-      if (categoriesResponse.success) {
-        setCategories(categoriesResponse.data || []);
-        // Auto-expand first category
-        const firstNonTestStrips = (categoriesResponse.data || []).find((c: any) => c?.name !== 'Test Strips');
-        if (firstNonTestStrips) {
-          setExpandedCategories(new Set([firstNonTestStrips.id]));
-        }
-      } else {
-        setError('Failed to load categories');
+      setCategories(categoriesData || []);
+      const firstCat = (categoriesData || [])[0];
+      if (firstCat?.id) {
+        setExpandedCategories(new Set([firstCat.id]));
       }
 
-      if (buyersResponse.success) {
-        setBuyers(buyersResponse.data || []);
-      }
-    } catch (error: any) {
-      console.error('Failed to load data:', error);
-      let errorMsg = 'Failed to load data. Please check your connection.';
-      
-      if (error.code === 'ERR_NETWORK' || !error.response) {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const isRailway = apiUrl.includes('railway.app');
-        errorMsg = isRailway
-          ? 'Cannot connect to Railway backend. Check Railway dashboard for service status.'
-          : 'Cannot connect to backend. Please ensure the backend server is running.';
-      } else if (error.code === 'ECONNABORTED') {
-        errorMsg = 'Request timed out. The backend may be slow or unresponsive. If on Railway, check service logs.';
-      } else if (error.response?.data?.error?.message) {
-        errorMsg = error.response.data.error.message;
-      }
-      
-      setError(errorMsg);
+      setBuyers(buyersData || []);
+    } catch {
+      setError('Could not load saved data.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLoadDefaultCatalog = () => {
+    if (
+      !confirm(
+        'Replace your in-browser product catalog with the default categories, products, and sample buyer prices? This overwrites the current category tree.'
+      )
+    ) {
+      return;
+    }
+    const next = JSON.parse(JSON.stringify(SEED_CATEGORIES)) as any[];
+    saveJson(SK.categories, next);
+    setCategories(next);
+    if (next[0]?.id) setExpandedCategories(new Set([next[0].id]));
   };
 
   const toggleCategory = (categoryId: string) => {
@@ -390,11 +374,23 @@ export default function Products() {
   return (
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-            <p className="mt-2 text-sm text-gray-600">Browse products by category and sub-category with expiration-based pricing</p>
+            <h2 className="text-3xl font-bold text-gray-900">Products</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Full Northeast-style catalog: NDC-level SKUs, expiration tiers (R1/R2), ding adjustments, and special buyer
+              notes. Other buyers show scaled sample prices for comparison—Northeast Medical Exchange matches the sheet
+              values.
+            </p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleLoadDefaultCatalog}
+              className="px-4 py-2 border border-gray-300 text-gray-800 rounded-lg hover:bg-gray-50 text-sm font-medium"
+            >
+              Load default catalog
+            </button>
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -402,6 +398,7 @@ export default function Products() {
             <Settings className="h-4 w-4" />
             <span>Settings</span>
           </button>
+          </div>
         </div>
         
         {/* Settings Panel */}

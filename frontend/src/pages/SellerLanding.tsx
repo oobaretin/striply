@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSellPageHead } from '../hooks/useSellPageHead';
 import {
   ArrowRight,
   BadgeCheck,
@@ -17,6 +18,14 @@ import {
 const SELL_PHONE = '(123) 456-7890';
 const SELL_PHONE_TEL = '+1234567890';
 const SELL_EMAIL = 'sell@striply.com';
+
+const STATIC_SELL_FORM_PRODUCTS = [
+  'OneTouch Ultra',
+  'Accu-Chek Guide',
+  'FreeStyle Lite',
+  'Contour Next',
+  'True Metrix',
+];
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
@@ -55,10 +64,13 @@ export default function SellerLanding() {
       { label: 'Why us', id: 'benefits' },
       { label: 'How it works', id: 'how-it-works' },
       { label: 'Reviews', id: 'testimonials' },
+      { label: 'Business tools', id: 'business-tools' },
       { label: 'FAQ', id: 'faq' },
     ],
     []
   );
+
+  useSellPageHead();
 
   useEffect(() => {
     if (!showForm) return;
@@ -71,34 +83,10 @@ export default function SellerLanding() {
 
   useEffect(() => {
     if (!showForm) return;
-    if (productOptionsLoading) return;
-    if (productOptions.length > 0) return;
-
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-    const base = apiUrl.endsWith('/api') ? apiUrl : apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
-
     setProductOptionsError(null);
-    setProductOptionsLoading(true);
-
-    fetch(`${base}/public/products`)
-      .then((r) => r.json())
-      .then((d) => {
-        const list = Array.isArray(d?.data) ? d.data : [];
-        const options = list
-          .map((p: any) => {
-            const name = String(p?.name ?? '').trim();
-            const ndc = String(p?.ndcCode ?? '').trim();
-            if (!name) return null;
-            return ndc ? `${name} — ${ndc}` : name;
-          })
-          .filter(Boolean);
-        setProductOptions(options);
-      })
-      .catch(() => {
-        setProductOptionsError('Unable to load product list. You can still type your brand manually.');
-      })
-      .finally(() => setProductOptionsLoading(false));
-  }, [showForm, productOptions.length, productOptionsLoading]);
+    setProductOptionsLoading(false);
+    setProductOptions(STATIC_SELL_FORM_PRODUCTS);
+  }, [showForm]);
 
   const benefits = [
     { icon: DollarSign, title: 'Competitive offers', description: 'Transparent quotes based on brand and expiration.' },
@@ -197,7 +185,7 @@ export default function SellerLanding() {
 
             <div className="flex items-center gap-2">
               <Link
-                to="/login"
+                to="/dashboard"
                 className="hidden sm:inline-flex items-center justify-center px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
               >
                 Business login
@@ -263,7 +251,7 @@ export default function SellerLanding() {
                 </button>
               ))}
               <Link
-                to="/login"
+                to="/dashboard"
                 className="block px-3 py-2 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-100"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -282,6 +270,7 @@ export default function SellerLanding() {
         </div>
       )}
 
+      <main id="main-content" tabIndex={-1} className="outline-none">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -419,6 +408,42 @@ export default function SellerLanding() {
                 <div className="mt-4 text-sm font-semibold text-gray-900">— {t.name}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Striply app capabilities */}
+      <section id="business-tools" className="py-14 bg-gradient-to-b from-white to-gray-50 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl font-bold text-gray-900">Built-in business tools</h2>
+            <p className="mt-2 text-gray-600">
+              The Striply dashboard mirrors a production resale workflow: Northeast-style product sheets with NDCs,
+              expiration tiers, ding pricing, CGM and insulin categories, plus your own buyers, purchases, and sales—
+              stored only in this browser until you export or connect a backend later.
+            </p>
+          </div>
+          <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+            {[
+              'Full product catalog: test strips (NDC), Dexcom / Libre / Omnipod, lancets, insulin vials',
+              'Per-buyer columns with R1/R2 tiers, ding reductions, and sheet-style labels',
+              'Special notes per SKU (e.g. NOT BUYING) surfaced in the products table',
+              'Target profit margin with recommended purchase prices from the best buyer tier',
+              'Purchases & sales with line items tied to the same catalog IDs',
+            ].map((text) => (
+              <li key={text} className="flex gap-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-8">
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center px-5 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
+            >
+              Open dashboard <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
           </div>
         </div>
       </section>
@@ -731,6 +756,8 @@ export default function SellerLanding() {
         </div>
       )}
 
+      </main>
+
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -754,7 +781,7 @@ export default function SellerLanding() {
                 </li>
                 ))}
                 <li>
-                  <Link to="/login" className="hover:text-white transition-colors">
+                  <Link to="/dashboard" className="hover:text-white transition-colors">
                     Business login
                   </Link>
                 </li>

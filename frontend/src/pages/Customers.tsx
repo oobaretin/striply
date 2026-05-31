@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
-import { customersApi } from '../lib/api';
+import { useEffect, useMemo, useState } from 'react';
+import { SK, loadJson, saveJson } from '../lib/localData';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 
 export default function Customers() {
   const [customers, setCustomers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
@@ -22,44 +21,39 @@ export default function Customers() {
   });
 
   useEffect(() => {
-    loadCustomers();
+    setCustomers(loadJson<any[]>(SK.customers, []));
   }, []);
 
-  const loadCustomers = async () => {
-    try {
-      const response = await customersApi.getAll({ search: searchTerm || undefined });
-      if (response.success) {
-        setCustomers(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to load customers:', error);
-    } finally {
-      setLoading(false);
-    }
+  const persist = (next: any[]) => {
+    setCustomers(next);
+    saveJson(SK.customers, next);
   };
 
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      loadCustomers();
-    }, 300);
-    return () => clearTimeout(debounce);
-  }, [searchTerm]);
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return customers;
+    return customers.filter(
+      (c) =>
+        `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+        String(c.phone || '').includes(q) ||
+        String(c.email || '').toLowerCase().includes(q)
+    );
+  }, [customers, searchTerm]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (editingCustomer) {
-        await customersApi.update(editingCustomer.id, formData);
-      } else {
-        await customersApi.create(formData);
-      }
-      setShowModal(false);
-      setEditingCustomer(null);
-      resetForm();
-      loadCustomers();
-    } catch (error) {
-      console.error('Failed to save customer:', error);
+    if (editingCustomer) {
+      persist(
+        customers.map((c) =>
+          c.id === editingCustomer.id ? { ...c, ...formData, id: c.id } : c
+        )
+      );
+    } else {
+      persist([...customers, { id: crypto.randomUUID(), ...formData }]);
     }
+    setShowModal(false);
+    setEditingCustomer(null);
+    resetForm();
   };
 
   const handleEdit = (customer: any) => {
@@ -79,14 +73,9 @@ export default function Customers() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to deactivate this customer?')) {
-      try {
-        await customersApi.delete(id);
-        loadCustomers();
-      } catch (error) {
-        console.error('Failed to delete customer:', error);
-      }
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to remove this customer?')) {
+      persist(customers.filter((c) => c.id !== id));
     }
   };
 
@@ -109,7 +98,7 @@ export default function Customers() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Sellers / Suppliers</h1>
+          <h2 className="text-3xl font-bold text-gray-900">Sellers / Suppliers</h2>
           <p className="mt-2 text-sm text-gray-600">People you buy test strips from (online or in-person)</p>
         </div>
         <button
@@ -138,45 +127,43 @@ export default function Customers() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-center py-12">Loading...</div>
-      ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {customers.map((customer) => (
-              <li key={customer.id}>
-                <div className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {customer.firstName} {customer.lastName}
-                        </p>
-                        <p className="text-sm text-gray-500">{customer.phone}</p>
-                        {customer.email && <p className="text-sm text-gray-500">{customer.email}</p>}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleEdit(customer)}
-                        className="text-primary-600 hover:text-primary-900"
-                      >
-                        <Edit className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(customer.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
+      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul className="divide-y divide-gray-200">
+          {filtered.map((customer) => (
+            <li key={customer.id}>
+              <div className="px-4 py-4 sm:px-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {customer.firstName} {customer.lastName}
+                      </p>
+                      <p className="text-sm text-gray-500">{customer.phone}</p>
+                      {customer.email && <p className="text-sm text-gray-500">{customer.email}</p>}
                     </div>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleEdit(customer)}
+                      className="text-primary-600 hover:text-primary-900"
+                      type="button"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(customer.id)}
+                      className="text-red-600 hover:text-red-900"
+                      type="button"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {showModal && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
@@ -306,4 +293,3 @@ export default function Customers() {
     </div>
   );
 }
-
